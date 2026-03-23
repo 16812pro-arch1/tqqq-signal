@@ -24,7 +24,6 @@ input{width:100%;padding:10px;border-radius:8px;border:1px solid #1a2640;backgro
 .tabs{display:flex;gap:4px;margin:12px 0;flex-wrap:wrap}
 .tab{padding:6px 12px;border-radius:6px;border:1px solid #1a2640;background:transparent;color:#4a5f7a;font-size:12px}
 .tab.on{color:#060a12}
-.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700}
 h1{font-size:20px;color:#f1f5f9;margin:4px 0}
 h2{font-size:14px;color:#f1f5f9;margin-bottom:10px}
 .big{font-size:22px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin:2px 0;color:#f1f5f9}
@@ -32,9 +31,10 @@ h2{font-size:14px;color:#f1f5f9;margin-bottom:10px}
 .dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
 canvas{width:100%;height:240px;display:block;margin-top:8px}
 .sig{border-radius:16px;padding:20px;margin-bottom:12px}
-.msg{padding:8px 12px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;margin-bottom:10px}
 .spin{display:inline-block;animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.alert-pulse{animation:pulse 1.5s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -48,8 +48,6 @@ var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRa2K1WPxeb6O6H5P
 var rows = [];
 var currentTab = "signal";
 var portVal = "";
-var msgText = null;
-var msgOk = true;
 
 function parseCSV(text) {
   var lines = text.split("\n");
@@ -214,9 +212,6 @@ function render() {
   var modeBd = mode === "bear" ? "rgba(239,68,68,0.2)" : mode === "dip" ? "rgba(56,189,248,0.2)" : "rgba(16,185,129,0.2)";
   var modeIcon = mode === "dip" ? "💎" : mode === "bear" ? "🛡️" : "⚡";
   var modeLbl = mode === "dip" ? "저점 매수 모드" : mode === "bear" ? "방어 모드" : "공격 모드";
-  var regimeIcon = regime === "BULL" ? "🐂" : "🐻";
-  var ddIcon = dd > 50 ? "🔥" : dd > 30 ? "⚠️" : "✅";
-  var allocIcon = alloc >= 75 ? "🚀" : alloc >= 40 ? "💎" : "🏦";
   var devColor = s.dev > 1.5 ? "#10b981" : s.dev < -1.5 ? "#ef4444" : "#eab308";
   var ddColor = dd > 50 ? "#38bdf8" : dd > 30 ? "#eab308" : "#10b981";
 
@@ -236,6 +231,7 @@ function render() {
 
   var h = "";
 
+  // Header
   h += '<div style="display:flex;justify-content:space-between;margin-bottom:14px">';
   h += '<div><div class="m d" style="letter-spacing:1px;color:#10b981">TQQQ DEFENSE+ · 175MA ±1.5%</div>';
   h += '<h1>매매 시그널</h1>';
@@ -244,10 +240,31 @@ function render() {
   h += '<div class="m b wh">' + s.date + '</div>';
   h += '<div class="m d">구글시트 실시간</div></div></div>';
 
-  if (msgText) {
-    h += '<div class="msg" style="background:' + (msgOk ? "rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:#10b981" : "rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:#ef4444") + '">' + (msgOk ? "✓ " : "✗ ") + msgText + '</div>';
+  // ACTION 경고 배너
+  if (s.action && s.action.length > 0) {
+    var isAttack = s.action.indexOf("공격") >= 0;
+    var isDip = s.action.indexOf("저점") >= 0;
+    var bannerBg = isAttack ? "rgba(16,185,129,0.15)" : isDip ? "rgba(56,189,248,0.15)" : "rgba(239,68,68,0.15)";
+    var bannerBd = isAttack ? "rgba(16,185,129,0.5)" : isDip ? "rgba(56,189,248,0.5)" : "rgba(239,68,68,0.5)";
+    var bannerColor = isAttack ? "#10b981" : isDip ? "#38bdf8" : "#ef4444";
+    h += '<div class="alert-pulse" style="background:' + bannerBg + ';border:2px solid ' + bannerBd + ';border-radius:12px;padding:16px;margin-bottom:12px;text-align:center">';
+    h += '<div style="font-size:24px;margin-bottom:6px">🚨</div>';
+    h += '<div style="font-size:18px;font-weight:700;color:' + bannerColor + '">' + s.action + '</div>';
+    h += '<div style="font-size:11px;color:#8896ab;margin-top:6px">종가 확인 후 익일 시가에 매매</div>';
+    h += '</div>';
   }
 
+  // 전일 대비 변동 감지
+  if (s2 && s.regime !== s2.regime) {
+    h += '<div style="background:rgba(245,158,11,0.15);border:2px solid rgba(245,158,11,0.5);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center">';
+    h += '<div style="font-size:15px;font-weight:700;color:#eab308">⚠️ 레짐 전환: ' + s2.regime + ' → ' + s.regime + '</div></div>';
+  }
+  if (s2 && s.alloc !== s2.alloc) {
+    h += '<div style="background:rgba(245,158,11,0.15);border:2px solid rgba(245,158,11,0.5);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center">';
+    h += '<div style="font-size:15px;font-weight:700;color:#eab308">⚠️ 배분 변경: ' + s2.alloc + '% → ' + s.alloc + '%</div></div>';
+  }
+
+  // Signal Card
   h += '<div class="sig" style="background:' + modeBg + ';border:2px solid ' + modeBd + '">';
   h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">';
   h += '<div style="width:48px;height:48px;border-radius:14px;background:' + modeColor + '15;border:2px solid ' + modeColor + '40;display:flex;align-items:center;justify-content:center;font-size:24px">' + modeIcon + '</div>';
@@ -262,6 +279,7 @@ function render() {
   h += '<div><div class="d">ATH</div><div class="m" style="color:#4a5f7a">$' + s.ath.toFixed(2) + '</div></div>';
   h += '<div><div class="d">리밸런싱</div><div class="m b yl">D-' + daysToQ + '</div></div></div></div>';
 
+  // Tabs
   h += '<div class="tabs">';
   var tabList = [["signal","시그널"],["calc","배분계산"],["chart","차트"],["history","히스토리"]];
   for (var i = 0; i < tabList.length; i++) {
@@ -272,6 +290,7 @@ function render() {
   }
   h += '</div>';
 
+  // Tab: Signal
   if (currentTab === "signal") {
     h += '<div class="c"><h2>지금 해야 할 일</h2>';
     h += '<div class="row"><div class="dot" style="background:' + modeColor + '"></div><div><div class="b wh" style="font-size:12px">포트폴리오 배분 확인</div><div class="d">TQQQ ' + alloc + '% / 현금 ' + (100 - alloc) + '% 비율 유지 중인지 체크</div></div></div>';
@@ -288,6 +307,7 @@ function render() {
     h += '<span class="sk">●</span> 방어 중 TQQQ DD &gt; 50% → <b class="wh">40%</b> 저점매수<br>';
     h += '<span class="yl">●</span> 버퍼 이내 → 이전 유지 · 분기말+전환시 리밸 · 쿨다운 5일</div>';
 
+    // Recent 5 days
     h += '<div class="c" style="margin-top:10px"><h2>최근 5일</h2>';
     for (var i = 1; i <= 5 && i < rows.length; i++) {
       var d = getRow(i);
@@ -303,6 +323,7 @@ function render() {
     h += '</div>';
   }
 
+  // Tab: Calculator
   if (currentTab === "calc") {
     h += '<div class="c"><h2>포트폴리오 배분 계산기</h2>';
     h += '<div class="d" style="margin-bottom:4px">총 투자금</div>';
@@ -322,11 +343,13 @@ function render() {
     h += '</div>';
   }
 
+  // Tab: Chart
   if (currentTab === "chart") {
     h += '<div class="c"><canvas id="cv"></canvas>';
     h += '<div class="d" style="margin-top:4px">QQQ가 노란 점선 밖으로 나가면 레짐 전환</div></div>';
   }
 
+  // Tab: History
   if (currentTab === "history") {
     h += '<div class="c"><h2>레짐 전환 히스토리</h2>';
     for (var i = 1; i < rows.length - 1; i++) {
@@ -347,6 +370,7 @@ function render() {
     h += '</div>';
   }
 
+  // Footer
   h += '<div style="text-align:center;margin-top:14px"><button onclick="loadData()" style="background:#1a2640;color:#cbd5e1;font-size:11px;padding:6px 14px;border-radius:6px">🔄 새로고침</button></div>';
   h += '<div style="text-align:center;margin-top:8px;font-size:8px;color:#4a5f7a;font-family:monospace">QQQ 175MA ±1.5% · 75/25 전환 · DD&gt;50% 저점매수 40% · 투자 판단은 본인 책임</div>';
 
