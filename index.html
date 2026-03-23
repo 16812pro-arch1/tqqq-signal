@@ -29,7 +29,7 @@ h2{font-size:14px;color:#f1f5f9;margin-bottom:10px}
 .big{font-size:22px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin:2px 0;color:#f1f5f9}
 .row{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:#131d2e;border:1px solid #1a2640;border-radius:8px;margin-bottom:4px}
 .dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
-canvas{width:100%;height:240px;display:block;margin-top:8px}
+canvas{width:100%;display:block;margin-top:8px}
 .sig{border-radius:16px;padding:20px;margin-bottom:12px}
 .spin{display:inline-block;animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -73,22 +73,18 @@ function parseCSV(text) {
 function loadData() {
   var direct = CSV_URL + "&_t=" + Date.now();
   var proxy = "https://api.allorigins.win/raw?url=" + encodeURIComponent(CSV_URL);
-
   var xhr = new XMLHttpRequest();
   xhr.timeout = 10000;
   xhr.onload = function() {
     try {
       var parsed = parseCSV(xhr.responseText);
       if (parsed.length < 3) { tryProxy(); return; }
-      rows = parsed;
-      render();
+      rows = parsed; render();
     } catch(e) { tryProxy(); }
   };
   xhr.onerror = function() { tryProxy(); };
   xhr.ontimeout = function() { tryProxy(); };
-  xhr.open("GET", direct);
-  xhr.send();
-
+  xhr.open("GET", direct); xhr.send();
   function tryProxy() {
     var xhr2 = new XMLHttpRequest();
     xhr2.timeout = 10000;
@@ -96,14 +92,12 @@ function loadData() {
       try {
         var parsed = parseCSV(xhr2.responseText);
         if (parsed.length < 3) { showError("데이터 부족"); return; }
-        rows = parsed;
-        render();
+        rows = parsed; render();
       } catch(e) { showError("파싱 오류: " + e.message); }
     };
     xhr2.onerror = function() { showError("네트워크 오류 — GitHub Pages에서 열어주세요"); };
     xhr2.ontimeout = function() { showError("타임아웃 — 새로고침 해주세요"); };
-    xhr2.open("GET", proxy);
-    xhr2.send();
+    xhr2.open("GET", proxy); xhr2.send();
   }
 }
 
@@ -115,37 +109,32 @@ function getRow(i) {
   if (i >= rows.length) return null;
   var r = rows[i];
   return {
-    date: r[0] || "",
-    tqqq: parseFloat(r[1]) || 0,
-    qqq: parseFloat(r[2]) || 0,
-    ma: parseFloat(r[3]) || 0,
-    dev: parseFloat(r[4]) || 0,
-    regime: r[5] || "",
-    cooldown: parseFloat(r[6]) || 0,
-    ath: parseFloat(r[7]) || 0,
-    dd: parseFloat(r[8]) || 0,
-    alloc: parseFloat(r[9]) || 0,
-    action: r[10] || ""
+    date: r[0]||"", tqqq: parseFloat(r[1])||0, qqq: parseFloat(r[2])||0,
+    ma: parseFloat(r[3])||0, dev: parseFloat(r[4])||0, regime: r[5]||"",
+    cooldown: parseFloat(r[6])||0, ath: parseFloat(r[7])||0,
+    dd: parseFloat(r[8])||0, alloc: parseFloat(r[9])||0, action: r[10]||""
   };
 }
 
-function drawChart() {
-  var cv = document.getElementById("cv");
-  if (!cv || rows.length < 130) return;
+function getChartData(days) {
+  var count = Math.min(days, rows.length - 1);
+  var data = [];
+  for (var i = 1; i <= count; i++) { var r = getRow(i); if (r && r.date) data.push(r); }
+  data.reverse();
+  return data;
+}
+
+function drawQQQChart() {
+  var cv = document.getElementById("cvQQQ");
+  if (!cv) return;
+  var data = getChartData(250);
+  if (data.length < 10) return;
   var ctx = cv.getContext("2d");
   var dpr = window.devicePixelRatio || 1;
   var w = cv.parentElement.clientWidth - 16, h = 240;
   cv.width = w * dpr; cv.height = h * dpr;
   cv.style.width = w + "px"; cv.style.height = h + "px";
   ctx.scale(dpr, dpr);
-
-  var count = Math.min(120, rows.length - 1);
-  var data = [];
-  for (var i = 1; i <= count; i++) {
-    var r = getRow(i);
-    if (r) data.push(r);
-  }
-  data.reverse();
 
   var vals = [];
   for (var i = 0; i < data.length; i++) {
@@ -166,34 +155,158 @@ function drawChart() {
     ctx.fillText("$" + Math.round(mn + (mx - mn) * (1 - i / 4)), pad.l - 4, yy + 3);
   }
   ctx.fillStyle = "#4a5f7a"; ctx.font = "8px JetBrains Mono"; ctx.textAlign = "center";
-  var step = Math.floor(data.length / 5);
+  var step = Math.floor(data.length / 6);
   for (var i = 0; i < data.length; i += step) { ctx.fillText(data[i].date, xp(i), h - 6); }
 
+  // Buffer fill
   ctx.fillStyle = "rgba(234,179,8,0.05)"; ctx.beginPath();
   var started = false;
   for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { var u = data[i].ma * 1.015; if (!started) { ctx.moveTo(xp(i), yp(u)); started = true; } else ctx.lineTo(xp(i), yp(u)); } }
   for (var i = data.length - 1; i >= 0; i--) { if (data[i].ma > 0) ctx.lineTo(xp(i), yp(data[i].ma * 0.985)); }
   ctx.fill();
 
+  // Buffer lines
   ctx.setLineDash([3, 3]); ctx.strokeStyle = "rgba(234,179,8,0.35)"; ctx.lineWidth = 1;
   ctx.beginPath(); started = false;
-  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { var u = data[i].ma * 1.015; if (!started) { ctx.moveTo(xp(i), yp(u)); started = true; } else ctx.lineTo(xp(i), yp(u)); } } ctx.stroke();
+  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma * 1.015)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma * 1.015)); } } ctx.stroke();
   ctx.beginPath(); started = false;
-  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { var l = data[i].ma * 0.985; if (!started) { ctx.moveTo(xp(i), yp(l)); started = true; } else ctx.lineTo(xp(i), yp(l)); } } ctx.stroke();
+  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma * 0.985)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma * 0.985)); } } ctx.stroke();
   ctx.setLineDash([]);
 
+  // MA
   ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2; ctx.beginPath(); started = false;
   for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma)); } } ctx.stroke();
 
+  // QQQ
   ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2.5; ctx.beginPath();
   ctx.moveTo(xp(0), yp(data[0].qqq));
   for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yp(data[i].qqq));
   ctx.stroke();
 
+  // Legend
   ctx.font = "10px JetBrains Mono";
   ctx.fillStyle = "#22d3ee"; ctx.fillText("━ QQQ", pad.l + 10, pad.t + 4);
   ctx.fillStyle = "#f97316"; ctx.fillText("━ 175MA", pad.l + 75, pad.t + 4);
   ctx.fillStyle = "#4a5f7a"; ctx.fillText("┈ ±1.5%", pad.l + 148, pad.t + 4);
+}
+
+function drawTQQQChart() {
+  var cv = document.getElementById("cvTQQQ");
+  if (!cv) return;
+  var data = getChartData(250);
+  if (data.length < 10) return;
+  var ctx = cv.getContext("2d");
+  var dpr = window.devicePixelRatio || 1;
+  var w = cv.parentElement.clientWidth - 16, h = 300;
+  cv.width = w * dpr; cv.height = h * dpr;
+  cv.style.width = w + "px"; cv.style.height = h + "px";
+  ctx.scale(dpr, dpr);
+
+  // Split: top 60% = TQQQ price, bottom 40% = DD
+  var pad = {t:15, r:10, b:28, l:48};
+  var totalH = h - pad.t - pad.b;
+  var priceH = totalH * 0.55;
+  var gap = 20;
+  var ddH = totalH * 0.35;
+  var priceTop = pad.t;
+  var ddTop = pad.t + priceH + gap;
+  var cw = w - pad.l - pad.r;
+
+  function xp(i) { return pad.l + (i / (data.length - 1)) * cw; }
+
+  // TQQQ price range
+  var pVals = [];
+  for (var i = 0; i < data.length; i++) pVals.push(data[i].tqqq);
+  var pMn = Math.min.apply(null, pVals) * 0.97, pMx = Math.max.apply(null, pVals) * 1.03;
+  function yPrice(v) { return priceTop + (1 - (v - pMn) / (pMx - pMn)) * priceH; }
+
+  // DD range (0 to max DD, inverted: 0 at top, max at bottom)
+  var ddVals = [];
+  for (var i = 0; i < data.length; i++) ddVals.push(data[i].dd);
+  var ddMax = Math.max.apply(null, ddVals);
+  ddMax = Math.max(ddMax, 50); // at least show 50% scale
+  function yDD(v) { return ddTop + (v / ddMax) * ddH; }
+
+  // X labels
+  ctx.fillStyle = "#4a5f7a"; ctx.font = "8px JetBrains Mono"; ctx.textAlign = "center";
+  var step = Math.floor(data.length / 6);
+  for (var i = 0; i < data.length; i += step) { ctx.fillText(data[i].date, xp(i), h - 6); }
+
+  // === TQQQ Price Section ===
+  // Grid
+  ctx.strokeStyle = "rgba(42,48,68,0.4)"; ctx.lineWidth = 0.5;
+  for (var i = 0; i < 4; i++) {
+    var yy = priceTop + i * priceH / 3;
+    ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(w - pad.r, yy); ctx.stroke();
+    ctx.fillStyle = "#4a5f7a"; ctx.font = "9px JetBrains Mono"; ctx.textAlign = "right";
+    ctx.fillText("$" + (pMn + (pMx - pMn) * (1 - i / 3)).toFixed(0), pad.l - 4, yy + 3);
+  }
+
+  // TQQQ line
+  ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 2.5; ctx.beginPath();
+  ctx.moveTo(xp(0), yPrice(data[0].tqqq));
+  for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yPrice(data[i].tqqq));
+  ctx.stroke();
+
+  // === DD Section ===
+  // Separator line
+  ctx.strokeStyle = "rgba(42,48,68,0.6)"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad.l, ddTop - 5); ctx.lineTo(w - pad.r, ddTop - 5); ctx.stroke();
+
+  // DD grid
+  var ddSteps = [0, 25, 50];
+  if (ddMax > 50) ddSteps.push(Math.round(ddMax / 10) * 10);
+  for (var i = 0; i < ddSteps.length; i++) {
+    var v = ddSteps[i];
+    if (v > ddMax) continue;
+    var yy = yDD(v);
+    ctx.strokeStyle = v === 50 ? "rgba(56,189,248,0.3)" : "rgba(42,48,68,0.3)";
+    ctx.lineWidth = v === 50 ? 1.5 : 0.5;
+    if (v === 50) ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(w - pad.r, yy); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = v === 50 ? "#38bdf8" : "#4a5f7a";
+    ctx.font = "9px JetBrains Mono"; ctx.textAlign = "right";
+    ctx.fillText("-" + v + "%", pad.l - 4, yy + 3);
+  }
+
+  // DD area fill (gradient effect with color zones)
+  for (var i = 1; i < data.length; i++) {
+    var ddVal = data[i].dd;
+    var color = ddVal > 50 ? "rgba(56,189,248,0.25)" : ddVal > 30 ? "rgba(234,179,8,0.15)" : "rgba(239,68,68,0.08)";
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(xp(i-1), yDD(0));
+    ctx.lineTo(xp(i-1), yDD(data[i-1].dd));
+    ctx.lineTo(xp(i), yDD(data[i].dd));
+    ctx.lineTo(xp(i), yDD(0));
+    ctx.fill();
+  }
+
+  // DD line
+  ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2; ctx.beginPath();
+  ctx.moveTo(xp(0), yDD(data[0].dd));
+  for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yDD(data[i].dd));
+  ctx.stroke();
+
+  // Current DD dot
+  var lastDD = data[data.length - 1].dd;
+  var lastX = xp(data.length - 1);
+  var lastY = yDD(lastDD);
+  ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = lastDD > 50 ? "#38bdf8" : "#ef4444"; ctx.fill();
+  ctx.fillStyle = lastDD > 50 ? "#38bdf8" : "#ef4444";
+  ctx.font = "bold 10px JetBrains Mono"; ctx.textAlign = "left";
+  ctx.fillText("-" + lastDD.toFixed(1) + "%", lastX - 40, lastY - 8);
+
+  // Legend
+  ctx.font = "10px JetBrains Mono";
+  ctx.fillStyle = "#a78bfa"; ctx.textAlign = "left";
+  ctx.fillText("━ TQQQ", pad.l + 5, priceTop + 4);
+  ctx.fillStyle = "#ef4444";
+  ctx.fillText("━ DD", pad.l + 5, ddTop + 8);
+  ctx.fillStyle = "#38bdf8";
+  ctx.fillText("┈ 50% (저점매수)", pad.l + 45, ddTop + 8);
 }
 
 function render() {
@@ -240,7 +353,7 @@ function render() {
   h += '<div class="m b wh">' + s.date + '</div>';
   h += '<div class="m d">구글시트 실시간</div></div></div>';
 
-  // ACTION 경고 배너
+  // ACTION alert
   if (s.action && s.action.length > 0) {
     var isAttack = s.action.indexOf("공격") >= 0;
     var isDip = s.action.indexOf("저점") >= 0;
@@ -250,11 +363,8 @@ function render() {
     h += '<div class="alert-pulse" style="background:' + bannerBg + ';border:2px solid ' + bannerBd + ';border-radius:12px;padding:16px;margin-bottom:12px;text-align:center">';
     h += '<div style="font-size:24px;margin-bottom:6px">🚨</div>';
     h += '<div style="font-size:18px;font-weight:700;color:' + bannerColor + '">' + s.action + '</div>';
-    h += '<div style="font-size:11px;color:#8896ab;margin-top:6px">종가 확인 후 익일 시가에 매매</div>';
-    h += '</div>';
+    h += '<div style="font-size:11px;color:#8896ab;margin-top:6px">종가 확인 후 익일 시가에 매매</div></div>';
   }
-
-  // 전일 대비 변동 감지
   if (s2 && s.regime !== s2.regime) {
     h += '<div style="background:rgba(245,158,11,0.15);border:2px solid rgba(245,158,11,0.5);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center">';
     h += '<div style="font-size:15px;font-weight:700;color:#eab308">⚠️ 레짐 전환: ' + s2.regime + ' → ' + s.regime + '</div></div>';
@@ -306,8 +416,6 @@ function render() {
     h += '<span class="rd">●</span> QQQ &lt; 175MA-1.5% → TQQQ <b class="wh">25%</b><br>';
     h += '<span class="sk">●</span> 방어 중 TQQQ DD &gt; 50% → <b class="wh">40%</b> 저점매수<br>';
     h += '<span class="yl">●</span> 버퍼 이내 → 이전 유지 · 분기말+전환시 리밸 · 쿨다운 5일</div>';
-
-    // Recent 5 days
     h += '<div class="c" style="margin-top:10px"><h2>최근 5일</h2>';
     for (var i = 1; i <= 5 && i < rows.length; i++) {
       var d = getRow(i);
@@ -343,10 +451,17 @@ function render() {
     h += '</div>';
   }
 
-  // Tab: Chart
+  // Tab: Chart (2 charts)
   if (currentTab === "chart") {
-    h += '<div class="c"><canvas id="cv"></canvas>';
-    h += '<div class="d" style="margin-top:4px">QQQ가 노란 점선 밖으로 나가면 레짐 전환</div></div>';
+    h += '<div class="c" style="padding:14px 8px 8px">';
+    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">QQQ vs 175MA (1년)</div>';
+    h += '<canvas id="cvQQQ" style="height:240px"></canvas>';
+    h += '<div class="d" style="padding:4px 6px">QQQ가 노란 점선 밖으로 나가면 레짐 전환</div></div>';
+
+    h += '<div class="c" style="padding:14px 8px 8px">';
+    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">TQQQ 주가 & Drawdown (1년)</div>';
+    h += '<canvas id="cvTQQQ" style="height:300px"></canvas>';
+    h += '<div class="d" style="padding:4px 6px">DD가 파란 점선(50%) 아래로 내려가면 저점매수 40% 발동</div></div>';
   }
 
   // Tab: History
@@ -375,7 +490,9 @@ function render() {
   h += '<div style="text-align:center;margin-top:8px;font-size:8px;color:#4a5f7a;font-family:monospace">QQQ 175MA ±1.5% · 75/25 전환 · DD&gt;50% 저점매수 40% · 투자 판단은 본인 책임</div>';
 
   document.getElementById("app").innerHTML = h;
-  if (currentTab === "chart") setTimeout(drawChart, 100);
+  if (currentTab === "chart") {
+    setTimeout(function() { drawQQQChart(); drawTQQQChart(); }, 100);
+  }
 }
 
 function switchTab(t) { currentTab = t; render(); }
