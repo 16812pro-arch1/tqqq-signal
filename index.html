@@ -247,13 +247,20 @@ function drawTQQQChart() {
   ctx.moveTo(xp(0), yPrice(data[0].tqqq));
   for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yPrice(data[i].tqqq));
   ctx.stroke();
-  // TQQQ 200MA
+  // TQQQ 200MA (전체 데이터로 계산)
+  var allTqqq = [];
+  for (var i = rows.length - 1; i >= 1; i--) {
+    var val = parseFloat(rows[i][1]) || 0;
+    if (val > 0) allTqqq.push(val);
+  }
+  var offset = allTqqq.length - data.length;
   ctx.strokeStyle = "#f97316"; ctx.lineWidth = 1.5; ctx.beginPath();
   var maStarted = false;
   for (var i = 0; i < data.length; i++) {
-    if (i < 199) continue;
+    var idx = offset + i;
+    if (idx < 199) continue;
     var sum200 = 0;
-    for (var j = i - 199; j <= i; j++) sum200 += data[j].tqqq;
+    for (var j = idx - 199; j <= idx; j++) sum200 += allTqqq[j];
     var ma200 = sum200 / 200;
     if (!maStarted) { ctx.moveTo(xp(i), yPrice(ma200)); maStarted = true; }
     else ctx.lineTo(xp(i), yPrice(ma200));
