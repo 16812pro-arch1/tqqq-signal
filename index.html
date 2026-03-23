@@ -217,12 +217,10 @@ function drawTQQQChart() {
     ctx.fillStyle = "#4a5f7a"; ctx.font = "9px JetBrains Mono"; ctx.textAlign = "right";
     ctx.fillText("$" + (pMn + (pMx - pMn) * (1 - i / 3)).toFixed(0), pad.l - 4, yy + 3);
   }
-  // TQQQ line
   ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 2.5; ctx.beginPath();
   ctx.moveTo(xp(0), yPrice(data[0].tqqq));
   for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yPrice(data[i].tqqq));
   ctx.stroke();
-  // TQQQ 200MA (전체 데이터로 계산)
   var allTqqq = [];
   for (var i = rows.length - 1; i >= 1; i--) {
     var val = parseFloat(rows[i][1]) || 0;
@@ -241,7 +239,6 @@ function drawTQQQChart() {
     else ctx.lineTo(xp(i), yPrice(ma200));
   }
   ctx.stroke();
-  // DD section
   ctx.strokeStyle = "rgba(42,48,68,0.6)"; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(pad.l, ddTop - 5); ctx.lineTo(w - pad.r, ddTop - 5); ctx.stroke();
   var ddSteps = [0, 25, 50];
@@ -321,7 +318,7 @@ function render() {
   } catch(e) {}
 
   var h = "";
-  // Header
+
   h += '<div style="display:flex;justify-content:space-between;margin-bottom:14px">';
   h += '<div><div class="m d" style="letter-spacing:1px;color:#10b981">TQQQ DEFENSE+ · 175MA ±1.5%</div>';
   h += '<h1>매매 시그널</h1>';
@@ -330,10 +327,6 @@ function render() {
   h += '<div class="m b wh">' + s.date + '</div>';
   h += '<div class="m d">구글시트 실시간</div></div></div>';
 
-  // Live price placeholder
-  h += '<div id="liveBanner"></div>';
-
-  // ACTION alert
   if (s.action && s.action.length > 0) {
     var isAttack = s.action.indexOf("공격") >= 0;
     var isDip = s.action.indexOf("저점") >= 0;
@@ -354,7 +347,6 @@ function render() {
     h += '<div style="font-size:15px;font-weight:700;color:#eab308">⚠️ 배분 변경: ' + s2.alloc + '% → ' + s.alloc + '%</div></div>';
   }
 
-  // Signal Card
   h += '<div class="sig" style="background:' + modeBg + ';border:2px solid ' + modeBd + '">';
   h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">';
   h += '<div style="width:48px;height:48px;border-radius:14px;background:' + modeColor + '15;border:2px solid ' + modeColor + '40;display:flex;align-items:center;justify-content:center;font-size:24px">' + modeIcon + '</div>';
@@ -369,7 +361,6 @@ function render() {
   h += '<div><div class="d">ATH</div><div class="m" style="color:#4a5f7a">$' + s.ath.toFixed(2) + '</div></div>';
   h += '<div><div class="d">리밸런싱</div><div class="m b yl">D-' + daysToQ + '</div></div></div></div>';
 
-  // Tabs
   h += '<div class="tabs">';
   var tabList = [["signal","시그널"],["calc","배분계산"],["chart","차트"],["history","히스토리"]];
   for (var i = 0; i < tabList.length; i++) {
@@ -380,7 +371,6 @@ function render() {
   }
   h += '</div>';
 
-  // Tab: Signal
   if (currentTab === "signal") {
     h += '<div class="c"><h2>지금 해야 할 일</h2>';
     h += '<div class="row"><div class="dot" style="background:' + modeColor + '"></div><div><div class="b wh" style="font-size:12px">포트폴리오 배분 확인</div><div class="d">TQQQ ' + alloc + '% / 현금 ' + (100 - alloc) + '% 비율 유지 중인지 체크</div></div></div>';
@@ -411,7 +401,6 @@ function render() {
     h += '</div>';
   }
 
-  // Tab: Calculator
   if (currentTab === "calc") {
     h += '<div class="c"><h2>포트폴리오 배분 계산기</h2>';
     h += '<div class="d" style="margin-bottom:4px">총 투자금</div>';
@@ -431,7 +420,6 @@ function render() {
     h += '</div>';
   }
 
-  // Tab: Chart
   if (currentTab === "chart") {
     h += '<div class="c" style="padding:14px 8px 8px">';
     h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">QQQ vs 175MA (1년) <span class="cy">$' + s.qqq + '</span></div>';
@@ -443,7 +431,6 @@ function render() {
     h += '<div class="d" style="padding:4px 6px">DD가 파란 점선(50%) 아래로 내려가면 저점매수 40% 발동</div></div>';
   }
 
-  // Tab: History
   if (currentTab === "history") {
     h += '<div class="c"><h2>레짐 전환 히스토리</h2>';
     for (var i = 1; i < rows.length - 1; i++) {
@@ -464,7 +451,6 @@ function render() {
     h += '</div>';
   }
 
-  // Footer
   h += '<div style="text-align:center;margin-top:14px"><button onclick="loadData()" style="background:#1a2640;color:#cbd5e1;font-size:11px;padding:6px 14px;border-radius:6px">🔄 새로고침</button></div>';
   h += '<div style="text-align:center;margin-top:8px;font-size:8px;color:#4a5f7a;font-family:monospace">QQQ 175MA ±1.5% · 75/25 전환 · DD&gt;50% 저점매수 40% · 투자 판단은 본인 책임</div>';
 
@@ -477,85 +463,7 @@ function render() {
 function switchTab(t) { currentTab = t; render(); }
 function onCalc(v) { portVal = v; render(); var el = document.getElementById("portIn"); if (el) { el.focus(); el.setSelectionRange(v.length, v.length); } }
 
-// Yahoo Finance 실시간 가격
-function fetchLivePrice() {
-  var proxy = "https://api.allorigins.win/raw?url=";
-  var url = proxy + encodeURIComponent("https://query2.finance.yahoo.com/v8/finance/chart/TQQQ?interval=1d&range=2d&includePrePost=true");
-  var xhr = new XMLHttpRequest();
-  xhr.timeout = 8000;
-  xhr.onload = function() {
-    try {
-      var d = JSON.parse(xhr.responseText);
-      var meta = d.chart.result[0].meta;
-      var regPrice = meta.regularMarketPrice;
-      var prevClose = meta.chartPreviousClose;
-      var pre = meta.preMarketPrice || 0;
-      var post = meta.postMarketPrice || 0;
-      var url2 = proxy + encodeURIComponent("https://query2.finance.yahoo.com/v8/finance/chart/QQQ?interval=1d&range=2d&includePrePost=true");
-      var xhr2 = new XMLHttpRequest();
-      xhr2.timeout = 8000;
-      xhr2.onload = function() {
-        try {
-          var d2 = JSON.parse(xhr2.responseText);
-          var qMeta = d2.chart.result[0].meta;
-          var qReg = qMeta.regularMarketPrice;
-          var qPre = qMeta.preMarketPrice || 0;
-          var qPost = qMeta.postMarketPrice || 0;
-          var qPrev = qMeta.chartPreviousClose;
-          var now = new Date();
-          var et = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
-          var hour = et.getHours();
-          var min = et.getMinutes();
-          var etMin = hour * 60 + min;
-          var day = et.getDay();
-          var isWeekend = (day === 0 || day === 6);
-          var session, tPrice, qPrice, tBase, qBase;
-          if (isWeekend) {
-            session = "🌙 주말 (장 마감)"; tPrice = regPrice; qPrice = qReg; tBase = prevClose; qBase = qPrev;
-          } else if (etMin >= 240 && etMin < 570) {
-            session = "🌅 프리마켓"; tPrice = pre > 0 ? pre : regPrice; qPrice = qPre > 0 ? qPre : qReg; tBase = prevClose; qBase = qPrev;
-          } else if (etMin >= 570 && etMin < 960) {
-            session = "🔔 정규장"; tPrice = regPrice; qPrice = qReg; tBase = prevClose; qBase = qPrev;
-          } else if (etMin >= 960 && etMin < 1200) {
-            session = "🌙 애프터마켓"; tPrice = post > 0 ? post : regPrice; qPrice = qPost > 0 ? qPost : qReg; tBase = regPrice; qBase = qReg;
-          } else {
-            session = "🌙 장 마감"; tPrice = post > 0 ? post : regPrice; qPrice = qPost > 0 ? qPost : qReg; tBase = prevClose; qBase = qPrev;
-          }
-          var tChg = ((tPrice - tBase) / tBase * 100);
-          var qChg = ((qPrice - qBase) / qBase * 100);
-          var tColor = tChg >= 0 ? "#10b981" : "#ef4444";
-          var qColor = qChg >= 0 ? "#10b981" : "#ef4444";
-          var tSign = tChg >= 0 ? "+" : "";
-          var qSign = qChg >= 0 ? "+" : "";
-          var etStr = String(hour).padStart(2, "0") + ":" + String(min).padStart(2, "0") + " ET";
-          var banner = document.getElementById("liveBanner");
-          if (banner) {
-            banner.style.cssText = "background:#0d1520;border:1px solid #1a2640;border-radius:12px;padding:12px 14px;margin-bottom:12px";
-            banner.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-              + '<div style="font-size:11px;font-weight:600;color:#8896ab">' + session + '</div>'
-              + '<div style="font-size:10px;color:#4a5f7a">' + etStr + '</div></div>'
-              + '<div style="display:flex;justify-content:space-between">'
-              + '<div><span style="font-size:10px;color:#4a5f7a">TQQQ </span>'
-              + '<span style="font-size:16px;font-weight:700;color:#f1f5f9;font-family:JetBrains Mono,monospace">$' + tPrice.toFixed(2) + '</span>'
-              + ' <span style="font-size:12px;font-weight:600;color:' + tColor + '">' + tSign + tChg.toFixed(2) + '%</span></div>'
-              + '<div><span style="font-size:10px;color:#4a5f7a">QQQ </span>'
-              + '<span style="font-size:16px;font-weight:700;color:#f1f5f9;font-family:JetBrains Mono,monospace">$' + qPrice.toFixed(2) + '</span>'
-              + ' <span style="font-size:12px;font-weight:600;color:' + qColor + '">' + qSign + qChg.toFixed(2) + '%</span></div>'
-              + '</div>';
-          }
-        } catch(e) {}
-      };
-      xhr2.onerror = function() {};
-      xhr2.open("GET", url2); xhr2.send();
-    } catch(e) {}
-  };
-  xhr.onerror = function() {};
-  xhr.open("GET", url); xhr.send();
-}
-
 loadData();
-setTimeout(fetchLivePrice, 3000);
-setInterval(fetchLivePrice, 60000);
 </script>
 </body>
 </html>
