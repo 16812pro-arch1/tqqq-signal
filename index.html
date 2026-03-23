@@ -3,288 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>TQQQ Signal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#060a12;color:#cbd5e1;font-family:-apple-system,sans-serif;font-size:14px}
+body{background:#060a12;color:#cbd5e1;font-family:'Inter',-apple-system,sans-serif;font-size:14px}
 .w{max-width:640px;margin:0 auto;padding:16px}
 .c{background:#0d1520;border:1px solid #1a2640;border-radius:12px;padding:14px;margin-bottom:10px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.m{font-family:monospace;font-size:12px}
+.m{font-family:'JetBrains Mono',monospace;font-size:12px}
 .b{font-weight:700}
 .d{color:#4a5f7a;font-size:11px}
 .wh{color:#f1f5f9}
 .gr{color:#10b981}.rd{color:#ef4444}.yl{color:#eab308}.or{color:#f97316}.cy{color:#22d3ee}.sk{color:#38bdf8}
 button{cursor:pointer;font-size:13px;border:none;border-radius:8px;padding:10px 16px;font-weight:600}
-input{width:100%;padding:10px;border-radius:8px;border:1px solid #1a2640;background:#131d2e;color:#f1f5f9;font-size:16px;font-family:monospace}
+input{width:100%;padding:10px;border-radius:8px;border:1px solid #1a2640;background:#131d2e;color:#f1f5f9;font-size:16px;font-family:'JetBrains Mono',monospace}
 .tabs{display:flex;gap:4px;margin:12px 0;flex-wrap:wrap}
 .tab{padding:6px 12px;border-radius:6px;border:1px solid #1a2640;background:transparent;color:#4a5f7a;font-size:12px}
-.tab.on{background:#10b981;color:#060a12;border-color:#10b981}
+.tab.on{color:#060a12}
 .pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700}
 h1{font-size:20px;color:#f1f5f9;margin:4px 0}
 h2{font-size:14px;color:#f1f5f9;margin-bottom:10px}
-.big{font-size:24px;font-weight:700;margin:2px 0}
+.big{font-size:22px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin:2px 0;color:#f1f5f9}
 .row{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:#131d2e;border:1px solid #1a2640;border-radius:8px;margin-bottom:4px}
 .dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
 canvas{width:100%;height:240px;display:block;margin-top:8px}
 .sig{border-radius:16px;padding:20px;margin-bottom:12px}
-.msg{padding:8px 12px;border-radius:8px;font-family:monospace;font-size:12px;margin-bottom:10px}
+.msg{padding:8px 12px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;margin-bottom:10px}
+.spin{display:inline-block;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <div class="w" id="app">
-<div style="text-align:center;padding:40px;color:#4a5f7a">로딩중...</div>
+<div style="text-align:center;padding:40px;color:#4a5f7a"><span class="spin">⏳</span> 구글시트에서 데이터 로딩중...</div>
 </div>
 
 <script>
-window.onerror = function(m,u,l,c,e) {
-  document.getElementById("app").innerHTML = '<div style="padding:20px;color:#ef4444;font-size:14px"><b>Error:</b> ' + m + '<br>Line: ' + l + '</div>';
-  return true;
-};
-// DATA
-var SEED = [["06/04/2025",36.935,528.77],["06/05/2025",36.075,524.79],["06/06/2025",37.105,529.92],["06/09/2025",37.27,530.7],["06/10/2025",37.99,534.21],["06/11/2025",37.6,532.41],["06/12/2025",37.845,533.66],["06/13/2025",36.415,526.96],["06/16/2025",37.9,534.29],["06/17/2025",36.78,529.08],["06/18/2025",36.73,528.99],["06/20/2025",36.225,526.83],["06/23/2025",37.35,531.65],["06/24/2025",39.05,539.78],["06/25/2025",39.24,541.16],["06/26/2025",40.315,546.22],["06/27/2025",40.71,548.09],["06/30/2025",41.5,551.64],["07/01/2025",40.445,546.99],["07/02/2025",41.25,550.8],["07/03/2025",42.405,556.22],["07/07/2025",41.46,552.03],["07/08/2025",41.515,552.34],["07/09/2025",42.375,556.25],["07/10/2025",42.18,555.45],["07/11/2025",41.86,554.2],["07/14/2025",42.305,556.21],["07/15/2025",42.415,556.72],["07/16/2025",42.535,557.29],["07/17/2025",43.525,561.8],["07/18/2025",43.375,561.26],["07/21/2025",44.035,564.17],["07/22/2025",43.35,561.25],["07/23/2025",43.92,563.81],["07/24/2025",44.21,565.01],["07/25/2025",44.46,566.37],["07/28/2025",44.8925,568.14],["07/29/2025",44.69,567.26],["07/30/2025",44.845,568.02],["07/31/2025",44.105,565.01],["08/01/2025",41.46,553.88],["08/04/2025",43.73,564.1],["08/05/2025",42.82,560.27],["08/06/2025",44.42,567.32],["08/07/2025",44.87,569.24],["08/08/2025",46.08,574.55],["08/11/2025",45.675,572.85],["08/12/2025",47.36,580.05],["08/13/2025",47.43,580.34],["08/14/2025",47.3,579.89],["08/15/2025",46.63,577.34],["08/18/2025",46.57,577.11],["08/19/2025",44.67,569.28],["08/20/2025",43.855,565.9],["08/21/2025",43.245,563.28],["08/22/2025",45.19,571.97],["08/25/2025",44.795,570.32],["08/26/2025",45.315,572.61],["08/27/2025",45.52,573.49],["08/28/2025",46.35,577.08],["08/29/2025",44.68,570.4],["09/02/2025",43.54,565.62],["09/03/2025",44.555,570.07],["09/04/2025",45.76,575.23],["09/05/2025",45.91,576.06],["09/08/2025",46.565,578.87],["09/09/2025",46.945,580.51],["09/10/2025",46.995,580.7],["09/11/2025",47.785,584.08],["09/12/2025",48.38,586.66],["09/15/2025",49.615,591.68],["09/16/2025",49.48,591.18],["09/17/2025",49.165,590.0],["09/18/2025",50.49,595.32],["09/19/2025",51.49,599.35],["09/22/2025",52.36,602.2],["09/23/2025",51.305,598.2],["09/24/2025",50.705,596.1],["09/25/2025",50.025,593.53],["09/26/2025",50.625,595.97],["09/29/2025",51.3,598.73],["09/30/2025",51.7,600.37],["10/01/2025",52.43,603.25],["10/02/2025",53.07,605.73],["10/03/2025",52.35,603.18],["10/06/2025",53.52,607.71],["10/07/2025",52.655,604.51],["10/08/2025",54.44,611.44],["10/09/2025",54.225,610.7],["10/10/2025",48.535,589.5],["10/13/2025",51.615,602.01],["10/14/2025",50.565,598.0],["10/15/2025",51.6,602.22],["10/16/2025",51.025,599.99],["10/17/2025",51.995,603.93],["10/20/2025",53.945,611.54],["10/21/2025",53.885,611.38],["10/22/2025",52.3,605.49],["10/23/2025",53.61,610.58],["10/24/2025",55.28,617.1],["10/27/2025",58.215,628.09],["10/28/2025",59.545,632.92],["10/29/2025",60.305,635.77],["10/30/2025",57.545,626.05],["10/31/2025",58.36,629.07],["11/03/2025",59.16,632.08],["11/04/2025",55.54,619.25],["11/05/2025",56.62,623.28],["11/06/2025",53.445,611.67],["11/07/2025",52.89,609.74],["11/10/2025",56.355,623.23],["11/11/2025",55.89,621.57],["11/12/2025",55.775,621.08],["11/13/2025",52.33,608.4],["11/14/2025",52.37,608.86],["11/17/2025",51.025,603.66],["11/18/2025",49.18,596.31],["11/19/2025",50.025,599.87],["11/20/2025",46.45,585.67],["11/21/2025",47.48,590.07],["11/24/2025",51.08,605.16],["11/25/2025",52.01,608.89],["11/26/2025",53.37,614.27],["11/28/2025",54.54,619.25],["12/01/2025",54.05,617.17],["12/02/2025",55.3,622.0],["12/03/2025",55.69,623.52],["12/04/2025",55.51,622.94],["12/05/2025",56.15,625.48],["12/08/2025",55.8,624.28],["12/09/2025",56.01,625.05],["12/10/2025",56.65,627.61],["12/11/2025",56.11,625.58],["12/12/2025",52.82,613.62],["12/15/2025",52.02,610.54],["12/16/2025",52.33,611.75],["12/17/2025",49.4,600.41],["12/18/2025",51.51,609.11],["12/19/2025",53.52,617.05],["12/22/2025",54.25,619.21],["12/23/2025",55.01,622.11],["12/24/2025",55.36,623.93],["12/26/2025",55.31,623.89],["12/29/2025",54.49,620.87],["12/30/2025",54.1,619.43],["12/31/2025",52.72,614.31],["01/02/2026",52.35,613.12],["01/05/2026",53.6,617.99],["01/06/2026",55.01,623.42],["01/07/2026",55.17,624.02],["01/08/2026",54.19,620.47],["01/09/2026",55.76,626.65],["01/12/2026",55.89,627.17],["01/13/2026",55.6,626.24],["01/14/2026",53.83,619.55],["01/15/2026",54.38,621.78],["01/16/2026",54.14,621.26],["01/20/2026",50.73,608.06],["01/21/2026",52.73,616.28],["01/22/2026",53.9,620.76],["01/23/2026",54.38,622.72],["01/26/2026",55.08,625.46],["01/27/2026",56.54,631.13],["01/28/2026",57.06,633.22],["01/29/2026",56.04,629.43],["01/30/2026",54.0,621.87],["02/02/2026",55.1,626.14],["02/03/2026",52.52,616.52],["02/04/2026",49.76,605.75],["02/05/2026",47.64,597.03],["02/06/2026",50.59,609.65],["02/09/2026",51.74,614.32],["02/10/2026",51.02,611.47],["02/11/2026",51.4,613.11],["02/12/2026",48.26,600.64],["02/13/2026",48.47,601.92],["02/17/2026",48.35,601.3],["02/18/2026",49.39,605.79],["02/19/2026",48.83,603.47],["02/20/2026",50.06,608.81],["02/23/2026",48.24,601.41],["02/24/2026",49.78,607.87],["02/25/2026",51.87,616.68],["02/26/2026",50.05,609.24],["02/27/2026",49.52,607.29],["03/02/2026",49.7,608.09],["03/03/2026",48.1,601.58],["03/04/2026",50.26,610.75],["03/05/2026",49.8,608.91],["03/06/2026",47.54,599.75],["03/09/2026",49.39,607.76],["03/10/2026",49.4,607.77],["03/11/2026",49.35,607.69],["03/12/2026",46.83,597.26],["03/13/2026",45.93,593.72],["03/16/2026",47.46,600.38],["03/17/2026",48.16,603.31],["03/18/2026",46.1,594.9],["03/19/2026",45.69,593.02],["03/20/2026",43.08,582.06]];
-var RH = [{"d":"10/11/2018","to":"25/75","dev":-1.7},{"d":"03/12/2019","to":"75/25","dev":2.0},{"d":"06/03/2019","to":"25/75","dev":-1.7},{"d":"06/10/2019","to":"75/25","dev":5.9},{"d":"03/09/2020","to":"25/75","dev":-4.1},{"d":"04/14/2020","to":"75/25","dev":5.3},{"d":"01/20/2022","to":"25/75","dev":-2.2},{"d":"01/26/2023","to":"75/25","dev":1.6},{"d":"03/06/2025","to":"25/75","dev":-1.7},{"d":"05/12/2025","to":"75/25","dev":2.5},{"d":"03/20/2026","to":"25/75","dev":-3.1}];
-var INIT_ATH = 60.305;
-var SK = "tqqq-v5";
+var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRa2K1WPxeb6O6H5Pmy5NL-v5IMK6Wf_tsvVi69ndpuQAr9m-DXnBtSLJiHtrjjXpOU6KvqNirbzMLH/pub?gid=1409073712&single=true&output=csv";
 
-// STATE
-var hist = null;
+var rows = [];
 var currentTab = "signal";
 var portVal = "";
 var msgText = null;
 var msgOk = true;
 
-// PARAMS
-var MA_P = 175;
-var BUF = 0.015;
-var BULL = 75;
-var BEAR = 25;
-var DIP_DD = 50;
-var DIP_ALLOC = 40;
-
-// LOAD
-var canStorage = false;
-try { localStorage.setItem("_test","1"); localStorage.removeItem("_test"); canStorage = true; } catch(e) {}
-
-function loadHist() {
-  if (canStorage) {
-    try {
-      var raw = localStorage.getItem(SK);
-      if (raw) {
-        var arr = JSON.parse(raw);
-        if (arr && arr.length >= MA_P) { hist = arr; return; }
-      }
-    } catch(e) {}
-  }
-  hist = SEED.slice();
-  saveHist();
-}
-
-function saveHist() {
-  if (canStorage) { try { localStorage.setItem(SK, JSON.stringify(hist)); } catch(e) {} }
-}
-
-// CALC
-function calc() {
-  if (!hist || hist.length < MA_P) return null;
-  var sum = 0;
-  for (var i = hist.length - MA_P; i < hist.length; i++) sum += hist[i][2];
-  var ma = sum / MA_P;
-  var l = hist[hist.length - 1];
-  var q = l[2], t = l[1];
-  var dev = ((q - ma) / ma) * 100;
-  var isBull = dev > (BUF * 100);
-  var isBear = dev < -(BUF * 100);
-  var regime = isBull ? "bull" : isBear ? "bear" : "buffer";
-
-  var lastBull = true;
-  for (var i = 0; i < RH.length; i++) lastBull = (RH[i].to === "75/25");
-
-  var ath = INIT_ATH;
-  for (var i = 0; i < hist.length; i++) { if (hist[i][1] > ath) ath = hist[i][1]; }
-  var tdd = ((ath - t) / ath) * 100;
-  var dip = tdd > DIP_DD;
-
-  var allocT, allocC, mode;
-  if (regime === "bull" || (regime === "buffer" && lastBull)) {
-    allocT = BULL; allocC = 100 - BULL; mode = "bull";
-  } else {
-    if (dip) { allocT = DIP_ALLOC; allocC = 100 - DIP_ALLOC; mode = "dip"; }
-    else { allocT = BEAR; allocC = 100 - BEAR; mode = "bear"; }
-  }
-
-  var parts = l[0].split("/");
-  var mo = parseInt(parts[0]), yr = parseInt(parts[2]), dy = parseInt(parts[1]);
-  var qEnds = [[3,31],[6,30],[9,30],[12,31]];
-  var qEnd = "", daysToQ = 0;
-  var now = new Date(yr, mo - 1, dy);
-  for (var i = 0; i < qEnds.length; i++) {
-    var qe = new Date(yr, qEnds[i][0] - 1, qEnds[i][1]);
-    if (qe >= now) {
-      qEnd = String(qEnds[i][0]).padStart(2, "0") + "/" + qEnds[i][1] + "/" + yr;
-      daysToQ = Math.max(0, Math.round((qe - now) / 86400000));
-      break;
+function parseCSV(text) {
+  var lines = text.split("\n");
+  var result = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
+    var cells = [];
+    var inQuote = false;
+    var cell = "";
+    for (var j = 0; j < line.length; j++) {
+      var ch = line[j];
+      if (ch === '"') { inQuote = !inQuote; }
+      else if (ch === ',' && !inQuote) { cells.push(cell.trim()); cell = ""; }
+      else { cell += ch; }
     }
+    cells.push(cell.trim());
+    result.push(cells);
   }
-  if (!qEnd) { qEnd = "03/31/" + (yr + 1); daysToQ = Math.round((new Date(yr+1,2,31) - now) / 86400000); }
+  return result;
+}
 
-  var upper = ma * (1 + BUF), lower = ma * (1 - BUF);
+function loadData() {
+  var direct = CSV_URL + "&_t=" + Date.now();
+  var proxy = "https://api.allorigins.win/raw?url=" + encodeURIComponent(CSV_URL);
+
+  var xhr = new XMLHttpRequest();
+  xhr.timeout = 10000;
+  xhr.onload = function() {
+    try {
+      var parsed = parseCSV(xhr.responseText);
+      if (parsed.length < 3) { tryProxy(); return; }
+      rows = parsed;
+      render();
+    } catch(e) { tryProxy(); }
+  };
+  xhr.onerror = function() { tryProxy(); };
+  xhr.ontimeout = function() { tryProxy(); };
+  xhr.open("GET", direct);
+  xhr.send();
+
+  function tryProxy() {
+    var xhr2 = new XMLHttpRequest();
+    xhr2.timeout = 10000;
+    xhr2.onload = function() {
+      try {
+        var parsed = parseCSV(xhr2.responseText);
+        if (parsed.length < 3) { showError("데이터 부족"); return; }
+        rows = parsed;
+        render();
+      } catch(e) { showError("파싱 오류: " + e.message); }
+    };
+    xhr2.onerror = function() { showError("네트워크 오류 — GitHub Pages에서 열어주세요"); };
+    xhr2.ontimeout = function() { showError("타임아웃 — 새로고침 해주세요"); };
+    xhr2.open("GET", proxy);
+    xhr2.send();
+  }
+}
+
+function showError(msg) {
+  document.getElementById("app").innerHTML = '<div style="padding:30px;text-align:center"><div style="color:#ef4444;font-size:14px;margin-bottom:12px">✗ ' + msg + '</div><button onclick="location.reload()" style="background:#1a2640;color:#cbd5e1;padding:10px 20px">새로고침</button></div>';
+}
+
+function getRow(i) {
+  if (i >= rows.length) return null;
+  var r = rows[i];
   return {
-    date:l[0], tqqq:t, qqq:q, ma:ma, dev:dev, regime:regime, mode:mode,
-    allocT:allocT, allocC:allocC, dipActive:dip,
-    tqqq_ath:ath, tqqq_dd:tdd,
-    upper:upper, lower:lower,
-    upperPct:((upper/q-1)*100), lowerPct:((lower/q-1)*100),
-    qEnd:qEnd, daysToQ:daysToQ, total:hist.length, lastBull:lastBull
+    date: r[0] || "",
+    tqqq: parseFloat(r[1]) || 0,
+    qqq: parseFloat(r[2]) || 0,
+    ma: parseFloat(r[3]) || 0,
+    dev: parseFloat(r[4]) || 0,
+    regime: r[5] || "",
+    cooldown: parseFloat(r[6]) || 0,
+    ath: parseFloat(r[7]) || 0,
+    dd: parseFloat(r[8]) || 0,
+    alloc: parseFloat(r[9]) || 0,
+    action: r[10] || ""
   };
 }
 
-// CHART (Canvas)
 function drawChart() {
   var cv = document.getElementById("cv");
-  if (!cv || !hist || hist.length < MA_P) return;
+  if (!cv || rows.length < 130) return;
   var ctx = cv.getContext("2d");
   var dpr = window.devicePixelRatio || 1;
-  var w = cv.parentElement.clientWidth - 16;
-  var h = 240;
+  var w = cv.parentElement.clientWidth - 16, h = 240;
   cv.width = w * dpr; cv.height = h * dpr;
   cv.style.width = w + "px"; cv.style.height = h + "px";
   ctx.scale(dpr, dpr);
 
-  var sl = hist.slice(-120);
-  var all = [];
-  for (var i = 0; i < hist.length; i++) all.push(hist[i][2]);
+  var count = Math.min(120, rows.length - 1);
   var data = [];
-  for (var i = 0; i < sl.length; i++) {
-    var idx = hist.length - 120 + i;
-    var ma = null;
-    if (idx >= MA_P - 1) {
-      var s2 = 0;
-      for (var j = idx - MA_P + 1; j <= idx; j++) s2 += all[j];
-      ma = s2 / MA_P;
-    }
-    data.push({ q: sl[i][2], ma: ma, u: ma ? ma * 1.015 : null, l: ma ? ma * 0.985 : null, d: sl[i][0] });
+  for (var i = 1; i <= count; i++) {
+    var r = getRow(i);
+    if (r) data.push(r);
   }
+  data.reverse();
 
   var vals = [];
   for (var i = 0; i < data.length; i++) {
-    vals.push(data[i].q);
-    if (data[i].ma) { vals.push(data[i].ma); vals.push(data[i].u); vals.push(data[i].l); }
+    vals.push(data[i].qqq);
+    if (data[i].ma > 0) { vals.push(data[i].ma); vals.push(data[i].ma * 1.015); vals.push(data[i].ma * 0.985); }
   }
-  var mn = Math.min.apply(null, vals) * 0.995;
-  var mx = Math.max.apply(null, vals) * 1.005;
-  var pad = { t: 15, r: 10, b: 28, l: 48 };
+  var mn = Math.min.apply(null, vals) * 0.995, mx = Math.max.apply(null, vals) * 1.005;
+  var pad = {t:15, r:10, b:28, l:48};
   var cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
-
   function xp(i) { return pad.l + (i / (data.length - 1)) * cw; }
   function yp(v) { return pad.t + (1 - (v - mn) / (mx - mn)) * ch; }
 
-  // Grid
   ctx.strokeStyle = "rgba(42,48,68,0.4)"; ctx.lineWidth = 0.5;
   for (var i = 0; i < 5; i++) {
     var yy = pad.t + i * ch / 4;
     ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(w - pad.r, yy); ctx.stroke();
-    ctx.fillStyle = "#4a5f7a"; ctx.font = "9px monospace"; ctx.textAlign = "right";
+    ctx.fillStyle = "#4a5f7a"; ctx.font = "9px JetBrains Mono"; ctx.textAlign = "right";
     ctx.fillText("$" + Math.round(mn + (mx - mn) * (1 - i / 4)), pad.l - 4, yy + 3);
   }
-
-  // X labels
-  ctx.fillStyle = "#4a5f7a"; ctx.font = "8px monospace"; ctx.textAlign = "center";
+  ctx.fillStyle = "#4a5f7a"; ctx.font = "8px JetBrains Mono"; ctx.textAlign = "center";
   var step = Math.floor(data.length / 5);
-  for (var i = 0; i < data.length; i += step) {
-    if (i < data.length) ctx.fillText(data[i].d, xp(i), h - 6);
-  }
+  for (var i = 0; i < data.length; i += step) { ctx.fillText(data[i].date, xp(i), h - 6); }
 
-  // Buffer fill
-  ctx.fillStyle = "rgba(234,179,8,0.05)";
-  ctx.beginPath();
+  ctx.fillStyle = "rgba(234,179,8,0.05)"; ctx.beginPath();
   var started = false;
-  for (var i = 0; i < data.length; i++) {
-    if (data[i].u != null) {
-      if (!started) { ctx.moveTo(xp(i), yp(data[i].u)); started = true; }
-      else ctx.lineTo(xp(i), yp(data[i].u));
-    }
-  }
-  for (var i = data.length - 1; i >= 0; i--) {
-    if (data[i].l != null) ctx.lineTo(xp(i), yp(data[i].l));
-  }
+  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { var u = data[i].ma * 1.015; if (!started) { ctx.moveTo(xp(i), yp(u)); started = true; } else ctx.lineTo(xp(i), yp(u)); } }
+  for (var i = data.length - 1; i >= 0; i--) { if (data[i].ma > 0) ctx.lineTo(xp(i), yp(data[i].ma * 0.985)); }
   ctx.fill();
 
-  // Buffer lines (dashed)
   ctx.setLineDash([3, 3]); ctx.strokeStyle = "rgba(234,179,8,0.35)"; ctx.lineWidth = 1;
   ctx.beginPath(); started = false;
-  for (var i = 0; i < data.length; i++) { if (data[i].u != null) { if (!started) { ctx.moveTo(xp(i), yp(data[i].u)); started = true; } else ctx.lineTo(xp(i), yp(data[i].u)); } } ctx.stroke();
+  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { var u = data[i].ma * 1.015; if (!started) { ctx.moveTo(xp(i), yp(u)); started = true; } else ctx.lineTo(xp(i), yp(u)); } } ctx.stroke();
   ctx.beginPath(); started = false;
-  for (var i = 0; i < data.length; i++) { if (data[i].l != null) { if (!started) { ctx.moveTo(xp(i), yp(data[i].l)); started = true; } else ctx.lineTo(xp(i), yp(data[i].l)); } } ctx.stroke();
+  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { var l = data[i].ma * 0.985; if (!started) { ctx.moveTo(xp(i), yp(l)); started = true; } else ctx.lineTo(xp(i), yp(l)); } } ctx.stroke();
   ctx.setLineDash([]);
 
-  // MA line (orange)
   ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2; ctx.beginPath(); started = false;
-  for (var i = 0; i < data.length; i++) { if (data[i].ma != null) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma)); } } ctx.stroke();
+  for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma)); } } ctx.stroke();
 
-  // QQQ line (cyan)
   ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2.5; ctx.beginPath();
-  ctx.moveTo(xp(0), yp(data[0].q));
-  for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yp(data[i].q));
+  ctx.moveTo(xp(0), yp(data[0].qqq));
+  for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yp(data[i].qqq));
   ctx.stroke();
 
-  // Legend
-  ctx.font = "10px monospace";
+  ctx.font = "10px JetBrains Mono";
   ctx.fillStyle = "#22d3ee"; ctx.fillText("━ QQQ", pad.l + 10, pad.t + 4);
   ctx.fillStyle = "#f97316"; ctx.fillText("━ 175MA", pad.l + 75, pad.t + 4);
   ctx.fillStyle = "#4a5f7a"; ctx.fillText("┈ ±1.5%", pad.l + 148, pad.t + 4);
 }
 
-// RENDER
 function render() {
-  var s = calc();
-  if (!s) { document.getElementById("app").innerHTML = '<div style="padding:40px;text-align:center;color:#ef4444">데이터 부족</div>'; return; }
+  var s = getRow(1);
+  var s2 = getRow(2);
+  var s3 = getRow(3);
+  if (!s || !s2) { showError("데이터 부족"); return; }
 
-  var modeColor = s.mode === "bear" ? "#ef4444" : s.mode === "dip" ? "#38bdf8" : "#10b981";
-  var modeBg = s.mode === "bear" ? "rgba(239,68,68,0.07)" : s.mode === "dip" ? "rgba(56,189,248,0.07)" : "rgba(16,185,129,0.07)";
-  var modeBd = s.mode === "bear" ? "rgba(239,68,68,0.2)" : s.mode === "dip" ? "rgba(56,189,248,0.2)" : "rgba(16,185,129,0.2)";
-  var modeIcon = s.mode === "dip" ? "💎" : s.mode === "bear" ? "🛡️" : "⚡";
-  var modeLbl = s.mode === "dip" ? "저점 매수 모드" : s.mode === "bear" ? "방어 모드" : "공격 모드";
+  var regime = s.regime;
+  var dd = s.dd;
+  var alloc = s.alloc;
+  var mode = regime === "BULL" ? "bull" : (dd > 50 ? "dip" : "bear");
+
+  var modeColor = mode === "bear" ? "#ef4444" : mode === "dip" ? "#38bdf8" : "#10b981";
+  var modeBg = mode === "bear" ? "rgba(239,68,68,0.07)" : mode === "dip" ? "rgba(56,189,248,0.07)" : "rgba(16,185,129,0.07)";
+  var modeBd = mode === "bear" ? "rgba(239,68,68,0.2)" : mode === "dip" ? "rgba(56,189,248,0.2)" : "rgba(16,185,129,0.2)";
+  var modeIcon = mode === "dip" ? "💎" : mode === "bear" ? "🛡️" : "⚡";
+  var modeLbl = mode === "dip" ? "저점 매수 모드" : mode === "bear" ? "방어 모드" : "공격 모드";
+  var regimeIcon = regime === "BULL" ? "🐂" : "🐻";
+  var ddIcon = dd > 50 ? "🔥" : dd > 30 ? "⚠️" : "✅";
+  var allocIcon = alloc >= 75 ? "🚀" : alloc >= 40 ? "💎" : "🏦";
   var devColor = s.dev > 1.5 ? "#10b981" : s.dev < -1.5 ? "#ef4444" : "#eab308";
-  var ddColor = s.tqqq_dd > 50 ? "#38bdf8" : s.tqqq_dd > 30 ? "#eab308" : "#10b981";
+  var ddColor = dd > 50 ? "#38bdf8" : dd > 30 ? "#eab308" : "#10b981";
+
+  var ma = s.ma;
+  var upper = ma * 1.015, lower = ma * 0.985;
+  var daysToQ = "?";
+  try {
+    var parts = s.date.replace(/\s/g, "").split(".");
+    var yr = parseInt(parts[0]), mo = parseInt(parts[1]), dy = parseInt(parts[2]);
+    var now = new Date(yr, mo - 1, dy);
+    var qEnds = [[3,31],[6,30],[9,30],[12,31]];
+    for (var i = 0; i < qEnds.length; i++) {
+      var qe = new Date(yr, qEnds[i][0] - 1, qEnds[i][1]);
+      if (qe >= now) { daysToQ = Math.max(0, Math.round((qe - now) / 86400000)); break; }
+    }
+  } catch(e) {}
 
   var h = "";
 
-  // Header
   h += '<div style="display:flex;justify-content:space-between;margin-bottom:14px">';
   h += '<div><div class="m d" style="letter-spacing:1px;color:#10b981">TQQQ DEFENSE+ · 175MA ±1.5%</div>';
   h += '<h1>매매 시그널</h1>';
   h += '<div class="m d">CAGR 33.2% · MDD -44.7% · Calmar 0.74</div></div>';
   h += '<div style="text-align:right"><div class="m d">기준일</div>';
   h += '<div class="m b wh">' + s.date + '</div>';
-  h += '<div class="m d">' + s.total + '일</div></div></div>';
+  h += '<div class="m d">구글시트 실시간</div></div></div>';
 
-  // Msg
   if (msgText) {
     h += '<div class="msg" style="background:' + (msgOk ? "rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:#10b981" : "rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:#ef4444") + '">' + (msgOk ? "✓ " : "✗ ") + msgText + '</div>';
   }
 
-  // Signal card
   h += '<div class="sig" style="background:' + modeBg + ';border:2px solid ' + modeBd + '">';
   h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">';
   h += '<div style="width:48px;height:48px;border-radius:14px;background:' + modeColor + '15;border:2px solid ' + modeColor + '40;display:flex;align-items:center;justify-content:center;font-size:24px">' + modeIcon + '</div>';
-  h += '<div><div class="b" style="color:' + modeColor + ';font-size:13px">' + modeLbl;
-  if (s.regime === "buffer") h += ' <span class="d">(' + (s.lastBull ? "공격" : "방어") + ' 유지)</span>';
-  h += '</div><div class="b wh" style="font-size:26px;line-height:1.1">TQQQ ' + s.allocT + '% · 현금 ' + s.allocC + '%</div></div></div>';
+  h += '<div><div class="b" style="color:' + modeColor + ';font-size:13px">' + modeLbl + '</div>';
+  h += '<div class="b wh" style="font-size:26px;line-height:1.1">TQQQ ' + alloc + '% · 현금 ' + (100 - alloc) + '%</div></div></div>';
   h += '<div class="g3" style="padding-top:12px;border-top:1px solid ' + modeColor + '22">';
   h += '<div><div class="d">TQQQ</div><div class="m b wh">$' + s.tqqq + '</div></div>';
   h += '<div><div class="d">QQQ vs MA</div><div class="m b" style="color:' + devColor + '">' + (s.dev > 0 ? "+" : "") + s.dev.toFixed(1) + '%</div></div>';
-  h += '<div><div class="d">TQQQ DD</div><div class="m b" style="color:' + ddColor + '">-' + s.tqqq_dd.toFixed(0) + '%</div></div></div>';
+  h += '<div><div class="d">TQQQ DD</div><div class="m b" style="color:' + ddColor + '">-' + dd.toFixed(0) + '%</div></div></div>';
   h += '<div class="g3" style="margin-top:6px">';
-  h += '<div><div class="d">175MA</div><div class="m b or">$' + s.ma.toFixed(0) + '</div></div>';
-  h += '<div><div class="d">ATH</div><div class="m" style="color:#4a5f7a">$' + s.tqqq_ath.toFixed(2) + '</div></div>';
-  h += '<div><div class="d">리밸런싱</div><div class="m b yl">D-' + s.daysToQ + '</div></div></div></div>';
+  h += '<div><div class="d">175MA</div><div class="m b or">$' + ma.toFixed(0) + '</div></div>';
+  h += '<div><div class="d">ATH</div><div class="m" style="color:#4a5f7a">$' + s.ath.toFixed(2) + '</div></div>';
+  h += '<div><div class="d">리밸런싱</div><div class="m b yl">D-' + daysToQ + '</div></div></div></div>';
 
-  // Tabs
   h += '<div class="tabs">';
-  var tabList = [["signal","시그널"],["calc","배분계산"],["chart","차트"],["history","히스토리"],["update","업데이트"]];
+  var tabList = [["signal","시그널"],["calc","배분계산"],["chart","차트"],["history","히스토리"]];
   for (var i = 0; i < tabList.length; i++) {
     var isOn = currentTab === tabList[i][0];
     h += '<button class="tab' + (isOn ? ' on' : '') + '" onclick="switchTab(\'' + tabList[i][0] + '\')"';
@@ -293,25 +272,37 @@ function render() {
   }
   h += '</div>';
 
-  // TAB: Signal
   if (currentTab === "signal") {
     h += '<div class="c"><h2>지금 해야 할 일</h2>';
-    h += '<div class="row"><div class="dot" style="background:' + modeColor + '"></div><div><div class="b wh" style="font-size:12px">포트폴리오 배분 확인</div><div class="d">TQQQ ' + s.allocT + '% / 현금 ' + s.allocC + '% 비율 유지 중인지 체크</div></div></div>';
-    var act2 = s.mode === "dip" ? "TQQQ DD -" + s.tqqq_dd.toFixed(0) + "% > 50% → 25%에서 40%로 확대" : s.mode === "bear" ? "QQQ $" + s.upper.toFixed(0) + " 돌파 전까지 25% 방어" : "QQQ $" + s.lower.toFixed(0) + " 이탈시 25%로 전환";
-    var act2c = s.mode === "dip" ? "#38bdf8" : s.mode === "bear" ? "#ef4444" : "#10b981";
-    h += '<div class="row"><div class="dot" style="background:' + act2c + '"></div><div><div class="b wh" style="font-size:12px">' + (s.mode === "dip" ? "저점 매수 비중 확대" : s.mode === "bear" ? "현금 극대화 유지" : "공격 비중 유지") + '</div><div class="d">' + act2 + '</div></div></div>';
-    h += '<div class="row"><div class="dot" style="background:#eab308"></div><div><div class="b wh" style="font-size:12px">분기 리밸런싱 D-' + s.daysToQ + '</div><div class="d">' + s.qEnd + ' 예정 · 종가 확인 후 익일 시가 매매</div></div></div></div>';
+    h += '<div class="row"><div class="dot" style="background:' + modeColor + '"></div><div><div class="b wh" style="font-size:12px">포트폴리오 배분 확인</div><div class="d">TQQQ ' + alloc + '% / 현금 ' + (100 - alloc) + '% 비율 유지 중인지 체크</div></div></div>';
+    var act2 = mode === "dip" ? "TQQQ DD -" + dd.toFixed(0) + "% > 50% → 25%에서 40%로 확대" : mode === "bear" ? "QQQ $" + Math.round(upper) + " 돌파 전까지 25% 방어" : "QQQ $" + Math.round(lower) + " 이탈시 25%로 전환";
+    var act2c = mode === "dip" ? "#38bdf8" : mode === "bear" ? "#ef4444" : "#10b981";
+    h += '<div class="row"><div class="dot" style="background:' + act2c + '"></div><div><div class="b wh" style="font-size:12px">' + (mode === "dip" ? "저점 매수 비중 확대" : mode === "bear" ? "현금 극대화 유지" : "공격 비중 유지") + '</div><div class="d">' + act2 + '</div></div></div>';
+    h += '<div class="row"><div class="dot" style="background:#eab308"></div><div><div class="b wh" style="font-size:12px">분기 리밸런싱 D-' + daysToQ + '</div><div class="d">종가 확인 후 익일 시가 매매</div></div></div></div>';
     h += '<div class="g2">';
-    h += '<div class="c" style="padding:12px"><div class="d">공격 전환 → 75/25</div><div class="gr" style="font-size:11px;margin-top:4px">QQQ &gt; $' + s.upper.toFixed(0) + '</div><div class="big wh">+' + s.upperPct.toFixed(1) + '%</div></div>';
-    h += '<div class="c" style="padding:12px"><div class="d">방어 전환 → 25/75</div><div class="rd" style="font-size:11px;margin-top:4px">QQQ &lt; $' + s.lower.toFixed(0) + '</div><div class="big wh">' + s.lowerPct.toFixed(1) + '%</div></div></div>';
+    h += '<div class="c" style="padding:12px"><div class="d">공격 전환 → 75/25</div><div class="gr" style="font-size:11px;margin-top:4px">QQQ &gt; $' + Math.round(upper) + '</div><div class="big">+' + ((upper / s.qqq - 1) * 100).toFixed(1) + '%</div></div>';
+    h += '<div class="c" style="padding:12px"><div class="d">방어 전환 → 25/75</div><div class="rd" style="font-size:11px;margin-top:4px">QQQ &lt; $' + Math.round(lower) + '</div><div class="big">' + ((lower / s.qqq - 1) * 100).toFixed(1) + '%</div></div></div>';
     h += '<div class="c d" style="line-height:1.8;font-size:11px">';
     h += '<span class="gr">●</span> QQQ &gt; 175MA+1.5% → TQQQ <b class="wh">75%</b><br>';
     h += '<span class="rd">●</span> QQQ &lt; 175MA-1.5% → TQQQ <b class="wh">25%</b><br>';
     h += '<span class="sk">●</span> 방어 중 TQQQ DD &gt; 50% → <b class="wh">40%</b> 저점매수<br>';
     h += '<span class="yl">●</span> 버퍼 이내 → 이전 유지 · 분기말+전환시 리밸 · 쿨다운 5일</div>';
+
+    h += '<div class="c" style="margin-top:10px"><h2>최근 5일</h2>';
+    for (var i = 1; i <= 5 && i < rows.length; i++) {
+      var d = getRow(i);
+      if (!d || !d.date) break;
+      var tag = i === 1 ? "📍" : "◽";
+      var dv = (d.dev > 0 ? "+" : "") + d.dev.toFixed(1);
+      var rc = d.regime === "BULL" ? "🐂" : "🐻";
+      h += '<div style="padding:4px 0;' + (i === 1 ? 'color:#f1f5f9' : 'color:#8896ab') + '">';
+      h += tag + ' ' + d.date + ' | ' + rc + ' ' + d.alloc + '%<br>';
+      h += '<span class="m">TQ $' + d.tqqq + ' | QQ $' + d.qqq + ' | Dev ' + dv + '% | DD -' + d.dd.toFixed(1) + '%</span></div>';
+      if (i < 5) h += '<div style="border-top:1px solid #1a2640;margin:4px 0"></div>';
+    }
+    h += '</div>';
   }
 
-  // TAB: Calc
   if (currentTab === "calc") {
     h += '<div class="c"><h2>포트폴리오 배분 계산기</h2>';
     h += '<div class="d" style="margin-bottom:4px">총 투자금</div>';
@@ -320,165 +311,53 @@ function render() {
     if (pv > 0) {
       h += '<div class="g2" style="margin-top:14px">';
       h += '<div style="background:' + modeBg + ';border:1px solid ' + modeBd + ';border-radius:12px;padding:14px;text-align:center">';
-      h += '<div class="m d">TQQQ (' + s.allocT + '%)' + (s.mode === "dip" ? " 💎" : "") + '</div>';
-      h += '<div class="big" style="color:' + modeColor + '">' + Math.round(pv * s.allocT / 100).toLocaleString() + '</div>';
-      h += '<div class="d">= ' + (pv * s.allocT / 100 / s.tqqq).toFixed(1) + '주 ($' + s.tqqq + ')</div></div>';
+      h += '<div class="m d">TQQQ (' + alloc + '%)</div>';
+      h += '<div class="big" style="color:' + modeColor + '">' + Math.round(pv * alloc / 100).toLocaleString() + '</div>';
+      h += '<div class="d">= ' + (pv * alloc / 100 / s.tqqq).toFixed(1) + '주 ($' + s.tqqq + ')</div></div>';
       h += '<div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:14px;text-align:center">';
-      h += '<div class="m d">현금 (' + s.allocC + '%)</div>';
-      h += '<div class="big yl">' + Math.round(pv * s.allocC / 100).toLocaleString() + '</div>';
+      h += '<div class="m d">현금 (' + (100 - alloc) + '%)</div>';
+      h += '<div class="big yl">' + Math.round(pv * (100 - alloc) / 100).toLocaleString() + '</div>';
       h += '<div class="d">연 3.5% 파킹 (세후 2.96%)</div></div></div>';
     }
     h += '</div>';
   }
 
-  // TAB: Chart
   if (currentTab === "chart") {
     h += '<div class="c"><canvas id="cv"></canvas>';
     h += '<div class="d" style="margin-top:4px">QQQ가 노란 점선 밖으로 나가면 레짐 전환</div></div>';
   }
 
-  // TAB: History
   if (currentTab === "history") {
     h += '<div class="c"><h2>레짐 전환 히스토리</h2>';
-    var rev = RH.slice().reverse();
-    for (var i = 0; i < rev.length; i++) {
-      var r = rev[i], b = r.to === "75/25", lt = (i === 0);
-      var bg2 = lt ? (b ? "rgba(16,185,129,0.07)" : "rgba(239,68,68,0.07)") : "transparent";
-      var bd2 = lt ? (b ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)") : "transparent";
-      h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:5px;border-radius:8px;background:' + bg2 + ';border:1px solid ' + bd2 + '">';
-      h += '<div style="width:28px;height:28px;border-radius:8px;background:' + (b ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)") + ';color:' + (b ? "#10b981" : "#ef4444") + ';display:flex;align-items:center;justify-content:center;font-weight:700">' + (b ? "↑" : "↓") + '</div>';
-      h += '<div style="flex:1"><div class="m b wh">' + r.d;
-      if (lt) h += ' <span class="pill" style="background:' + modeColor + '22;color:' + modeColor + '">현재</span>';
-      h += '</div><div class="d">175MA 대비 ' + (r.dev > 0 ? "+" : "") + r.dev + '%</div></div>';
-      h += '<div class="b" style="font-size:14px;color:' + (b ? "#10b981" : "#ef4444") + '">' + r.to + '</div></div>';
+    for (var i = 1; i < rows.length - 1; i++) {
+      var cur = getRow(i);
+      var prev = getRow(i + 1);
+      if (!cur || !prev || !cur.date || !cur.regime || !prev.regime) continue;
+      if (cur.regime !== prev.regime) {
+        var b = cur.regime === "BULL";
+        var bg2 = b ? "rgba(16,185,129,0.07)" : "rgba(239,68,68,0.07)";
+        var bd2 = b ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)";
+        h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:5px;border-radius:8px;background:' + bg2 + ';border:1px solid ' + bd2 + '">';
+        h += '<div style="width:28px;height:28px;border-radius:8px;background:' + (b ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)") + ';color:' + (b ? "#10b981" : "#ef4444") + ';display:flex;align-items:center;justify-content:center;font-weight:700">' + (b ? "↑" : "↓") + '</div>';
+        h += '<div style="flex:1"><div class="m b wh">' + cur.date + '</div>';
+        h += '<div class="d">175MA 대비 ' + (cur.dev > 0 ? "+" : "") + cur.dev.toFixed(1) + '%</div></div>';
+        h += '<div class="b" style="font-size:14px;color:' + (b ? "#10b981" : "#ef4444") + '">' + (b ? "75/25" : "25/75") + '</div></div>';
+      }
     }
     h += '</div>';
   }
 
-  // TAB: Update
-  if (currentTab === "update") {
-    h += '<div class="c"><h2>가격 가져오기</h2>';
-    h += '<button id="fetchBtn" onclick="doFetch()" style="width:100%;background:linear-gradient(135deg,#22d3ee,#10b981);color:#060a12;padding:14px;font-size:14px">🔍 Yahoo Finance에서 가격 가져오기</button>';
-    h += '<div class="d" style="margin-top:6px">페이지 열면 자동 업데이트 · 버튼으로 수동 새로고침</div></div>';
-    h += '<div class="c"><h2>수동 입력</h2>';
-    h += '<div class="g2"><div><div class="d">TQQQ 종가</div><input id="inT" type="number" step="0.01" placeholder="43.08" style="margin-top:4px"></div>';
-    h += '<div><div class="d">QQQ 종가</div><input id="inQ" type="number" step="0.01" placeholder="582.06" style="margin-top:4px"></div></div>';
-    h += '<button onclick="addManual()" style="width:100%;margin-top:10px;background:transparent;border:1px solid #f97316;color:#f97316;padding:10px">저장</button></div>';
-    h += '<div class="c d">저장: ' + (hist ? hist.length : 0) + '일 · <b class="gr">실제 QQQ 종가</b> · localStorage';
-    h += '<br><button onclick="resetAll()" style="margin-top:6px;background:transparent;border:1px solid #1a2640;color:#4a5f7a;font-size:10px;padding:4px 8px">초기화</button></div>';
-  }
-
-  h += '<div style="text-align:center;margin-top:14px;font-size:8px;color:#4a5f7a;font-family:monospace">QQQ 175MA ±1.5% · 75/25 전환 · DD&gt;50% 저점매수 40% · 투자 판단은 본인 책임</div>';
+  h += '<div style="text-align:center;margin-top:14px"><button onclick="loadData()" style="background:#1a2640;color:#cbd5e1;font-size:11px;padding:6px 14px;border-radius:6px">🔄 새로고침</button></div>';
+  h += '<div style="text-align:center;margin-top:8px;font-size:8px;color:#4a5f7a;font-family:monospace">QQQ 175MA ±1.5% · 75/25 전환 · DD&gt;50% 저점매수 40% · 투자 판단은 본인 책임</div>';
 
   document.getElementById("app").innerHTML = h;
   if (currentTab === "chart") setTimeout(drawChart, 100);
 }
 
-// ACTIONS
 function switchTab(t) { currentTab = t; render(); }
 function onCalc(v) { portVal = v; render(); var el = document.getElementById("portIn"); if (el) { el.focus(); el.setSelectionRange(v.length, v.length); } }
 
-function showMsg(ok, text, duration) {
-  msgOk = ok; msgText = text; render();
-  if (duration) setTimeout(function() { msgText = null; render(); }, duration);
-}
-
-function addEntry(date, tqqq, qqq) {
-  var entry = [date, tqqq, qqq];
-  var lastD = hist[hist.length - 1][0];
-  if (date === lastD) { hist = hist.slice(0, -1).concat([entry]); }
-  else { hist = hist.concat([entry]); }
-  if (hist.length > 250) hist = hist.slice(-250);
-  saveHist();
-}
-
-function doFetch() {
-  showMsg(true, "검색중...", 0);
-  var proxies = [
-    "https://api.allorigins.win/raw?url=",
-    "https://api.codetabs.com/v1/proxy?quest=",
-    "https://corsproxy.io/?"
-  ];
-  var yahooBase = "https://query2.finance.yahoo.com/v8/finance/chart/";
-
-  function tryFetchBoth(proxyIdx) {
-    if (proxyIdx >= proxies.length) {
-      showMsg(false, "자동 업데이트 실패 — 아래 수동 입력 사용", 0);
-      return;
-    }
-    var p = proxies[proxyIdx];
-    var qqqUrl = p + encodeURIComponent(yahooBase + "QQQ?interval=1d&range=2d");
-    var tqqqUrl = p + encodeURIComponent(yahooBase + "TQQQ?interval=1d&range=2d");
-    var qqqData = null;
-
-    var xhr1 = new XMLHttpRequest();
-    xhr1.timeout = 8000;
-    xhr1.onload = function() {
-      try {
-        var d = JSON.parse(xhr1.responseText);
-        qqqData = d;
-        var xhr2 = new XMLHttpRequest();
-        xhr2.timeout = 8000;
-        xhr2.onload = function() {
-          try {
-            var d2 = JSON.parse(xhr2.responseText);
-            var qp = qqqData.chart.result[0].meta.regularMarketPrice;
-            var tp = d2.chart.result[0].meta.regularMarketPrice;
-            var ts = qqqData.chart.result[0].meta.regularMarketTime;
-            var dt = new Date(ts * 1000);
-            var ds = String(dt.getMonth()+1).padStart(2,"0") + "/" + String(dt.getDate()).padStart(2,"0") + "/" + dt.getFullYear();
-            qp = Math.round(qp * 100) / 100;
-            tp = Math.round(tp * 100) / 100;
-            if (qp > 0 && tp > 0) {
-              addEntry(ds, tp, qp);
-              showMsg(true, "QQQ $" + qp + " / TQQQ $" + tp + " (" + ds + ")", 10000);
-            } else { tryFetchBoth(proxyIdx + 1); }
-          } catch(e) { tryFetchBoth(proxyIdx + 1); }
-        };
-        xhr2.onerror = function() { tryFetchBoth(proxyIdx + 1); };
-        xhr2.ontimeout = function() { tryFetchBoth(proxyIdx + 1); };
-        xhr2.open("GET", tqqqUrl);
-        xhr2.send();
-      } catch(e) { tryFetchBoth(proxyIdx + 1); }
-    };
-    xhr1.onerror = function() { tryFetchBoth(proxyIdx + 1); };
-    xhr1.ontimeout = function() { tryFetchBoth(proxyIdx + 1); };
-    xhr1.open("GET", qqqUrl);
-    xhr1.send();
-  }
-  tryFetchBoth(0);
-}
-
-function addManual() {
-  var elT = document.getElementById("inT");
-  var elQ = document.getElementById("inQ");
-  if (!elT || !elQ) return;
-  var t = parseFloat(elT.value), q = parseFloat(elQ.value);
-  if (isNaN(t) || isNaN(q) || t <= 0 || q <= 0) { showMsg(false, "가격을 입력하세요", 3000); return; }
-  var now = new Date();
-  var ds = String(now.getMonth()+1).padStart(2,"0") + "/" + String(now.getDate()).padStart(2,"0") + "/" + now.getFullYear();
-  addEntry(ds, t, q);
-  showMsg(true, "QQQ $" + q + " / TQQQ $" + t + " 저장", 5000);
-}
-
-function resetAll() {
-  hist = SEED.slice();
-  saveHist();
-  showMsg(true, "초기화 완료", 3000);
-}
-
-// INIT
-try {
-  loadHist();
-  render();
-} catch(e) {
-  document.getElementById("app").innerHTML = '<div style="padding:20px;color:#ef4444"><b>Init Error:</b> ' + e.message + '</div>';
-}
-
-// Auto-fetch (safe, delayed)
-setTimeout(function() {
-  try { doFetch(); } catch(e) {}
-}, 2000);
+loadData();
 </script>
 </body>
 </html>
