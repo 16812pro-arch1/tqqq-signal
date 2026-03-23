@@ -247,7 +247,18 @@ function drawTQQQChart() {
   ctx.moveTo(xp(0), yPrice(data[0].tqqq));
   for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yPrice(data[i].tqqq));
   ctx.stroke();
-
+  // TQQQ 200MA
+  ctx.strokeStyle = "#f97316"; ctx.lineWidth = 1.5; ctx.beginPath();
+  var maStarted = false;
+  for (var i = 0; i < data.length; i++) {
+    if (i < 199) continue;
+    var sum200 = 0;
+    for (var j = i - 199; j <= i; j++) sum200 += data[j].tqqq;
+    var ma200 = sum200 / 200;
+    if (!maStarted) { ctx.moveTo(xp(i), yPrice(ma200)); maStarted = true; }
+    else ctx.lineTo(xp(i), yPrice(ma200));
+  }
+  ctx.stroke();
   // === DD Section ===
   // Separator line
   ctx.strokeStyle = "rgba(42,48,68,0.6)"; ctx.lineWidth = 1;
@@ -303,6 +314,8 @@ function drawTQQQChart() {
   ctx.font = "10px JetBrains Mono";
   ctx.fillStyle = "#a78bfa"; ctx.textAlign = "left";
   ctx.fillText("━ TQQQ", pad.l + 5, priceTop + 4);
+  ctx.fillStyle = "#f97316";
+  ctx.fillText("━ 200MA", pad.l + 70, priceTop + 4);
   ctx.fillStyle = "#ef4444";
   ctx.fillText("━ DD", pad.l + 5, ddTop + 8);
   ctx.fillStyle = "#38bdf8";
