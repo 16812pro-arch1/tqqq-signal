@@ -454,12 +454,12 @@ function render() {
   // Tab: Chart (2 charts)
   if (currentTab === "chart") {
     h += '<div class="c" style="padding:14px 8px 8px">';
-    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">QQQ vs 175MA (1년)</div>';
+    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">QQQ vs 175MA (1년) <span class="cy">$' + s.qqq + '</span></div>';
     h += '<canvas id="cvQQQ" style="height:240px"></canvas>';
     h += '<div class="d" style="padding:4px 6px">QQQ가 노란 점선 밖으로 나가면 레짐 전환</div></div>';
 
     h += '<div class="c" style="padding:14px 8px 8px">';
-    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">TQQQ 주가 & Drawdown (1년)</div>';
+    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">TQQQ 주가 & DD (1년) <span style="color:#a78bfa">$' + s.tqqq + '</span> <span class="rd">DD -' + dd.toFixed(1) + '%</span></div>'; 
     h += '<canvas id="cvTQQQ" style="height:300px"></canvas>';
     h += '<div class="d" style="padding:4px 6px">DD가 파란 점선(50%) 아래로 내려가면 저점매수 40% 발동</div></div>';
   }
