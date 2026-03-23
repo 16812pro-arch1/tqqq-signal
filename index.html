@@ -135,7 +135,6 @@ function drawQQQChart() {
   cv.width = w * dpr; cv.height = h * dpr;
   cv.style.width = w + "px"; cv.style.height = h + "px";
   ctx.scale(dpr, dpr);
-
   var vals = [];
   for (var i = 0; i < data.length; i++) {
     vals.push(data[i].qqq);
@@ -146,7 +145,6 @@ function drawQQQChart() {
   var cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
   function xp(i) { return pad.l + (i / (data.length - 1)) * cw; }
   function yp(v) { return pad.t + (1 - (v - mn) / (mx - mn)) * ch; }
-
   ctx.strokeStyle = "rgba(42,48,68,0.4)"; ctx.lineWidth = 0.5;
   for (var i = 0; i < 5; i++) {
     var yy = pad.t + i * ch / 4;
@@ -157,33 +155,23 @@ function drawQQQChart() {
   ctx.fillStyle = "#4a5f7a"; ctx.font = "8px JetBrains Mono"; ctx.textAlign = "center";
   var step = Math.floor(data.length / 6);
   for (var i = 0; i < data.length; i += step) { ctx.fillText(data[i].date, xp(i), h - 6); }
-
-  // Buffer fill
   ctx.fillStyle = "rgba(234,179,8,0.05)"; ctx.beginPath();
   var started = false;
   for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { var u = data[i].ma * 1.015; if (!started) { ctx.moveTo(xp(i), yp(u)); started = true; } else ctx.lineTo(xp(i), yp(u)); } }
   for (var i = data.length - 1; i >= 0; i--) { if (data[i].ma > 0) ctx.lineTo(xp(i), yp(data[i].ma * 0.985)); }
   ctx.fill();
-
-  // Buffer lines
   ctx.setLineDash([3, 3]); ctx.strokeStyle = "rgba(234,179,8,0.35)"; ctx.lineWidth = 1;
   ctx.beginPath(); started = false;
   for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma * 1.015)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma * 1.015)); } } ctx.stroke();
   ctx.beginPath(); started = false;
   for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma * 0.985)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma * 0.985)); } } ctx.stroke();
   ctx.setLineDash([]);
-
-  // MA
   ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2; ctx.beginPath(); started = false;
   for (var i = 0; i < data.length; i++) { if (data[i].ma > 0) { if (!started) { ctx.moveTo(xp(i), yp(data[i].ma)); started = true; } else ctx.lineTo(xp(i), yp(data[i].ma)); } } ctx.stroke();
-
-  // QQQ
   ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2.5; ctx.beginPath();
   ctx.moveTo(xp(0), yp(data[0].qqq));
   for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yp(data[i].qqq));
   ctx.stroke();
-
-  // Legend
   ctx.font = "10px JetBrains Mono";
   ctx.fillStyle = "#22d3ee"; ctx.fillText("━ QQQ", pad.l + 10, pad.t + 4);
   ctx.fillStyle = "#f97316"; ctx.fillText("━ 175MA", pad.l + 75, pad.t + 4);
@@ -201,8 +189,6 @@ function drawTQQQChart() {
   cv.width = w * dpr; cv.height = h * dpr;
   cv.style.width = w + "px"; cv.style.height = h + "px";
   ctx.scale(dpr, dpr);
-
-  // Split: top 60% = TQQQ price, bottom 40% = DD
   var pad = {t:15, r:10, b:28, l:48};
   var totalH = h - pad.t - pad.b;
   var priceH = totalH * 0.55;
@@ -211,29 +197,19 @@ function drawTQQQChart() {
   var priceTop = pad.t;
   var ddTop = pad.t + priceH + gap;
   var cw = w - pad.l - pad.r;
-
   function xp(i) { return pad.l + (i / (data.length - 1)) * cw; }
-
-  // TQQQ price range
   var pVals = [];
   for (var i = 0; i < data.length; i++) pVals.push(data[i].tqqq);
   var pMn = Math.min.apply(null, pVals) * 0.97, pMx = Math.max.apply(null, pVals) * 1.03;
   function yPrice(v) { return priceTop + (1 - (v - pMn) / (pMx - pMn)) * priceH; }
-
-  // DD range (0 to max DD, inverted: 0 at top, max at bottom)
   var ddVals = [];
   for (var i = 0; i < data.length; i++) ddVals.push(data[i].dd);
   var ddMax = Math.max.apply(null, ddVals);
-  ddMax = Math.max(ddMax, 50); // at least show 50% scale
+  ddMax = Math.max(ddMax, 50);
   function yDD(v) { return ddTop + (v / ddMax) * ddH; }
-
-  // X labels
   ctx.fillStyle = "#4a5f7a"; ctx.font = "8px JetBrains Mono"; ctx.textAlign = "center";
   var step = Math.floor(data.length / 6);
   for (var i = 0; i < data.length; i += step) { ctx.fillText(data[i].date, xp(i), h - 6); }
-
-  // === TQQQ Price Section ===
-  // Grid
   ctx.strokeStyle = "rgba(42,48,68,0.4)"; ctx.lineWidth = 0.5;
   for (var i = 0; i < 4; i++) {
     var yy = priceTop + i * priceH / 3;
@@ -241,7 +217,6 @@ function drawTQQQChart() {
     ctx.fillStyle = "#4a5f7a"; ctx.font = "9px JetBrains Mono"; ctx.textAlign = "right";
     ctx.fillText("$" + (pMn + (pMx - pMn) * (1 - i / 3)).toFixed(0), pad.l - 4, yy + 3);
   }
-
   // TQQQ line
   ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 2.5; ctx.beginPath();
   ctx.moveTo(xp(0), yPrice(data[0].tqqq));
@@ -266,12 +241,9 @@ function drawTQQQChart() {
     else ctx.lineTo(xp(i), yPrice(ma200));
   }
   ctx.stroke();
-  // === DD Section ===
-  // Separator line
+  // DD section
   ctx.strokeStyle = "rgba(42,48,68,0.6)"; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(pad.l, ddTop - 5); ctx.lineTo(w - pad.r, ddTop - 5); ctx.stroke();
-
-  // DD grid
   var ddSteps = [0, 25, 50];
   if (ddMax > 50) ddSteps.push(Math.round(ddMax / 10) * 10);
   for (var i = 0; i < ddSteps.length; i++) {
@@ -287,27 +259,19 @@ function drawTQQQChart() {
     ctx.font = "9px JetBrains Mono"; ctx.textAlign = "right";
     ctx.fillText("-" + v + "%", pad.l - 4, yy + 3);
   }
-
-  // DD area fill (gradient effect with color zones)
   for (var i = 1; i < data.length; i++) {
     var ddVal = data[i].dd;
     var color = ddVal > 50 ? "rgba(56,189,248,0.25)" : ddVal > 30 ? "rgba(234,179,8,0.15)" : "rgba(239,68,68,0.08)";
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.moveTo(xp(i-1), yDD(0));
-    ctx.lineTo(xp(i-1), yDD(data[i-1].dd));
-    ctx.lineTo(xp(i), yDD(data[i].dd));
-    ctx.lineTo(xp(i), yDD(0));
+    ctx.moveTo(xp(i-1), yDD(0)); ctx.lineTo(xp(i-1), yDD(data[i-1].dd));
+    ctx.lineTo(xp(i), yDD(data[i].dd)); ctx.lineTo(xp(i), yDD(0));
     ctx.fill();
   }
-
-  // DD line
   ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2; ctx.beginPath();
   ctx.moveTo(xp(0), yDD(data[0].dd));
   for (var i = 1; i < data.length; i++) ctx.lineTo(xp(i), yDD(data[i].dd));
   ctx.stroke();
-
-  // Current DD dot
   var lastDD = data[data.length - 1].dd;
   var lastX = xp(data.length - 1);
   var lastY = yDD(lastDD);
@@ -316,8 +280,6 @@ function drawTQQQChart() {
   ctx.fillStyle = lastDD > 50 ? "#38bdf8" : "#ef4444";
   ctx.font = "bold 10px JetBrains Mono"; ctx.textAlign = "left";
   ctx.fillText("-" + lastDD.toFixed(1) + "%", lastX - 40, lastY - 8);
-
-  // Legend
   ctx.font = "10px JetBrains Mono";
   ctx.fillStyle = "#a78bfa"; ctx.textAlign = "left";
   ctx.fillText("━ TQQQ", pad.l + 5, priceTop + 4);
@@ -332,14 +294,11 @@ function drawTQQQChart() {
 function render() {
   var s = getRow(1);
   var s2 = getRow(2);
-  var s3 = getRow(3);
   if (!s || !s2) { showError("데이터 부족"); return; }
-
   var regime = s.regime;
   var dd = s.dd;
   var alloc = s.alloc;
   var mode = regime === "BULL" ? "bull" : (dd > 50 ? "dip" : "bear");
-
   var modeColor = mode === "bear" ? "#ef4444" : mode === "dip" ? "#38bdf8" : "#10b981";
   var modeBg = mode === "bear" ? "rgba(239,68,68,0.07)" : mode === "dip" ? "rgba(56,189,248,0.07)" : "rgba(16,185,129,0.07)";
   var modeBd = mode === "bear" ? "rgba(239,68,68,0.2)" : mode === "dip" ? "rgba(56,189,248,0.2)" : "rgba(16,185,129,0.2)";
@@ -347,7 +306,6 @@ function render() {
   var modeLbl = mode === "dip" ? "저점 매수 모드" : mode === "bear" ? "방어 모드" : "공격 모드";
   var devColor = s.dev > 1.5 ? "#10b981" : s.dev < -1.5 ? "#ef4444" : "#eab308";
   var ddColor = dd > 50 ? "#38bdf8" : dd > 30 ? "#eab308" : "#10b981";
-
   var ma = s.ma;
   var upper = ma * 1.015, lower = ma * 0.985;
   var daysToQ = "?";
@@ -363,7 +321,6 @@ function render() {
   } catch(e) {}
 
   var h = "";
-
   // Header
   h += '<div style="display:flex;justify-content:space-between;margin-bottom:14px">';
   h += '<div><div class="m d" style="letter-spacing:1px;color:#10b981">TQQQ DEFENSE+ · 175MA ±1.5%</div>';
@@ -372,6 +329,9 @@ function render() {
   h += '<div style="text-align:right"><div class="m d">기준일</div>';
   h += '<div class="m b wh">' + s.date + '</div>';
   h += '<div class="m d">구글시트 실시간</div></div></div>';
+
+  // Live price placeholder
+  h += '<div id="liveBanner"></div>';
 
   // ACTION alert
   if (s.action && s.action.length > 0) {
@@ -471,15 +431,14 @@ function render() {
     h += '</div>';
   }
 
-  // Tab: Chart (2 charts)
+  // Tab: Chart
   if (currentTab === "chart") {
     h += '<div class="c" style="padding:14px 8px 8px">';
     h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">QQQ vs 175MA (1년) <span class="cy">$' + s.qqq + '</span></div>';
     h += '<canvas id="cvQQQ" style="height:240px"></canvas>';
     h += '<div class="d" style="padding:4px 6px">QQQ가 노란 점선 밖으로 나가면 레짐 전환</div></div>';
-
     h += '<div class="c" style="padding:14px 8px 8px">';
-    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">TQQQ 주가 & DD (1년) <span style="color:#a78bfa">$' + s.tqqq + '</span> <span class="rd">DD -' + dd.toFixed(1) + '%</span></div>'; 
+    h += '<div style="padding:0 6px;margin-bottom:4px;font-size:12px;font-weight:600;color:#f1f5f9">TQQQ 주가 & DD (1년) <span style="color:#a78bfa">$' + s.tqqq + '</span> <span class="rd">DD -' + dd.toFixed(1) + '%</span></div>';
     h += '<canvas id="cvTQQQ" style="height:300px"></canvas>';
     h += '<div class="d" style="padding:4px 6px">DD가 파란 점선(50%) 아래로 내려가면 저점매수 40% 발동</div></div>';
   }
@@ -518,7 +477,85 @@ function render() {
 function switchTab(t) { currentTab = t; render(); }
 function onCalc(v) { portVal = v; render(); var el = document.getElementById("portIn"); if (el) { el.focus(); el.setSelectionRange(v.length, v.length); } }
 
+// Yahoo Finance 실시간 가격
+function fetchLivePrice() {
+  var proxy = "https://api.allorigins.win/raw?url=";
+  var url = proxy + encodeURIComponent("https://query2.finance.yahoo.com/v8/finance/chart/TQQQ?interval=1d&range=2d&includePrePost=true");
+  var xhr = new XMLHttpRequest();
+  xhr.timeout = 8000;
+  xhr.onload = function() {
+    try {
+      var d = JSON.parse(xhr.responseText);
+      var meta = d.chart.result[0].meta;
+      var regPrice = meta.regularMarketPrice;
+      var prevClose = meta.chartPreviousClose;
+      var pre = meta.preMarketPrice || 0;
+      var post = meta.postMarketPrice || 0;
+      var url2 = proxy + encodeURIComponent("https://query2.finance.yahoo.com/v8/finance/chart/QQQ?interval=1d&range=2d&includePrePost=true");
+      var xhr2 = new XMLHttpRequest();
+      xhr2.timeout = 8000;
+      xhr2.onload = function() {
+        try {
+          var d2 = JSON.parse(xhr2.responseText);
+          var qMeta = d2.chart.result[0].meta;
+          var qReg = qMeta.regularMarketPrice;
+          var qPre = qMeta.preMarketPrice || 0;
+          var qPost = qMeta.postMarketPrice || 0;
+          var qPrev = qMeta.chartPreviousClose;
+          var now = new Date();
+          var et = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
+          var hour = et.getHours();
+          var min = et.getMinutes();
+          var etMin = hour * 60 + min;
+          var day = et.getDay();
+          var isWeekend = (day === 0 || day === 6);
+          var session, tPrice, qPrice, tBase, qBase;
+          if (isWeekend) {
+            session = "🌙 주말 (장 마감)"; tPrice = regPrice; qPrice = qReg; tBase = prevClose; qBase = qPrev;
+          } else if (etMin >= 240 && etMin < 570) {
+            session = "🌅 프리마켓"; tPrice = pre > 0 ? pre : regPrice; qPrice = qPre > 0 ? qPre : qReg; tBase = prevClose; qBase = qPrev;
+          } else if (etMin >= 570 && etMin < 960) {
+            session = "🔔 정규장"; tPrice = regPrice; qPrice = qReg; tBase = prevClose; qBase = qPrev;
+          } else if (etMin >= 960 && etMin < 1200) {
+            session = "🌙 애프터마켓"; tPrice = post > 0 ? post : regPrice; qPrice = qPost > 0 ? qPost : qReg; tBase = regPrice; qBase = qReg;
+          } else {
+            session = "🌙 장 마감"; tPrice = post > 0 ? post : regPrice; qPrice = qPost > 0 ? qPost : qReg; tBase = prevClose; qBase = qPrev;
+          }
+          var tChg = ((tPrice - tBase) / tBase * 100);
+          var qChg = ((qPrice - qBase) / qBase * 100);
+          var tColor = tChg >= 0 ? "#10b981" : "#ef4444";
+          var qColor = qChg >= 0 ? "#10b981" : "#ef4444";
+          var tSign = tChg >= 0 ? "+" : "";
+          var qSign = qChg >= 0 ? "+" : "";
+          var etStr = String(hour).padStart(2, "0") + ":" + String(min).padStart(2, "0") + " ET";
+          var banner = document.getElementById("liveBanner");
+          if (banner) {
+            banner.style.cssText = "background:#0d1520;border:1px solid #1a2640;border-radius:12px;padding:12px 14px;margin-bottom:12px";
+            banner.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+              + '<div style="font-size:11px;font-weight:600;color:#8896ab">' + session + '</div>'
+              + '<div style="font-size:10px;color:#4a5f7a">' + etStr + '</div></div>'
+              + '<div style="display:flex;justify-content:space-between">'
+              + '<div><span style="font-size:10px;color:#4a5f7a">TQQQ </span>'
+              + '<span style="font-size:16px;font-weight:700;color:#f1f5f9;font-family:JetBrains Mono,monospace">$' + tPrice.toFixed(2) + '</span>'
+              + ' <span style="font-size:12px;font-weight:600;color:' + tColor + '">' + tSign + tChg.toFixed(2) + '%</span></div>'
+              + '<div><span style="font-size:10px;color:#4a5f7a">QQQ </span>'
+              + '<span style="font-size:16px;font-weight:700;color:#f1f5f9;font-family:JetBrains Mono,monospace">$' + qPrice.toFixed(2) + '</span>'
+              + ' <span style="font-size:12px;font-weight:600;color:' + qColor + '">' + qSign + qChg.toFixed(2) + '%</span></div>'
+              + '</div>';
+          }
+        } catch(e) {}
+      };
+      xhr2.onerror = function() {};
+      xhr2.open("GET", url2); xhr2.send();
+    } catch(e) {}
+  };
+  xhr.onerror = function() {};
+  xhr.open("GET", url); xhr.send();
+}
+
 loadData();
+setTimeout(fetchLivePrice, 3000);
+setInterval(fetchLivePrice, 60000);
 </script>
 </body>
 </html>
